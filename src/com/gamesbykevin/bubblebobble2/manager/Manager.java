@@ -4,6 +4,8 @@ import com.gamesbykevin.framework.menu.Menu;
 import com.gamesbykevin.framework.util.*;
 
 import com.gamesbykevin.bubblebobble2.engine.Engine;
+import com.gamesbykevin.bubblebobble2.hero.Hero;
+import com.gamesbykevin.bubblebobble2.input.Input;
 import com.gamesbykevin.bubblebobble2.maps.Maps;
 import com.gamesbykevin.bubblebobble2.menu.CustomMenu;
 import com.gamesbykevin.bubblebobble2.menu.CustomMenu.*;
@@ -24,6 +26,9 @@ public final class Manager implements IManager
     //the levels in our game
     private Maps maps;
     
+    //the hero
+    private Hero hero;
+    
     /**
      * Constructor for Manager, this is the point where we load any menu option configurations
      * @param engine Engine for our game that contains all objects needed
@@ -43,6 +48,11 @@ public final class Manager implements IManager
         //create new maps
         maps = new Maps(engine.getResources().getGameImage(GameImages.Keys.Maps), getWindow());
         
+        //create new hero
+        hero = new Hero(Hero.Type.Hero2);
+        hero.setImage(engine.getResources().getGameImage(GameImages.Keys.Heroes));
+        hero.setLocation(64, 32);
+        
         //check the number of lives set
         //switch (engine.getMenu().getOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.Lives))
     }
@@ -51,6 +61,11 @@ public final class Manager implements IManager
     public void reset(final Engine engine) throws Exception
     {
         
+    }
+    
+    public Maps getMaps()
+    {
+        return this.maps;
     }
     
     @Override
@@ -99,7 +114,19 @@ public final class Manager implements IManager
     @Override
     public void update(final Engine engine) throws Exception
     {
-        maps.update(engine);
+        if (!maps.isComplete())
+        {
+            //this is called to generate the maps
+            maps.update(engine);
+        }
+        else
+        {
+            //update character
+            Input.update(hero, engine.getKeyboard());
+            
+            //update hero
+            hero.update(engine);
+        }
     }
     
     /**
@@ -110,5 +137,10 @@ public final class Manager implements IManager
     public void render(final Graphics graphics)
     {
         maps.render(graphics);
+        
+        if (maps.isComplete())
+        {
+            hero.render(graphics);
+        }
     }
 }

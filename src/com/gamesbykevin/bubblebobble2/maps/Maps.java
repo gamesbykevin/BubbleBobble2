@@ -55,8 +55,6 @@ public final class Maps implements Disposable, IElement
     public Maps(final Image image, final Rectangle window)
     {
         this.index = (int)(Math.random() * MAP_COUNT);
-        this.index = 137;
-        
         
         System.out.println("Random Level: " + (index+1));
         
@@ -159,6 +157,24 @@ public final class Maps implements Disposable, IElement
         }
     }
     
+    /**
+     * Get the map
+     * @return The current map
+     */
+    public Map getMap()
+    {
+        return maps.get(index);
+    }
+    
+    /**
+     * Are we done creating the levels?
+     * @return true if the levels have been created, false otherwise
+     */
+    public boolean isComplete()
+    {
+        return progress.isComplete();
+    }
+    
     @Override
     public void update(final Engine engine)
     {
@@ -192,11 +208,11 @@ public final class Maps implements Disposable, IElement
             //draw map
             if (Shared.DEBUG)
             {
-                maps.get(index).renderTest(graphics);
+                getMap().renderTest(graphics);
             }
             else
             {
-                maps.get(index).draw(graphics, image);
+                getMap().draw(graphics, image);
             }
         }
     }

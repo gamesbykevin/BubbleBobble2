@@ -7,23 +7,34 @@ import com.gamesbykevin.bubblebobble2.entity.Entity;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.util.ArrayList;
-import java.util.List;
 
 public final class Map extends Entity implements Disposable
 {
     //each map contains blocks 8 x 8 in size
-    private static final int BLOCK_SIZE = 8;
+    public static final int BLOCK_SIZE = 8;
     
     //default size of each map
     protected static final int WIDTH = 256;
     protected static final int HEIGHT = 192;
     
     //the dimension size of 8 x 8 blocks in each map
-    private static final int COLUMNS = 32;
-    private static final int ROWS = 24;
+    public static final int COLUMNS = 32;
+    public static final int ROWS = 24;
     
-    private List<Location> locations;
+    //each map has boundaries where gameplay takes place
+    private static final int BOUNDARY_COL_MIN = 2;
+    private static final int BOUNDARY_COL_MAX = COLUMNS - 3;
+    private static final int BOUNDARY_ROW_MIN = 1;
+    private static final int BOUNDARY_ROW_MAX = ROWS - 2;
+    
+    //some maps may have gaps in the floor
+    private static final int FLOOR_GAP_START_COL_1 = 9;
+    private static final int FLOOR_GAP_END_COL_1   = 12;
+    private static final int FLOOR_GAP_START_COL_2 = 19;
+    private static final int FLOOR_GAP_END_COL_2   = 22;
+    
+    //the array of locations in this map
+    private Location[][] locations;
     
     /**
      * Create a new map with the specified background coordinates
@@ -36,10 +47,10 @@ public final class Map extends Entity implements Disposable
         super.setDimensions(WIDTH, HEIGHT);
         
         //the background map is static and won't change
-        super.addAnimation(Entity.DEFAULT_ANIMATION_KEY, 1, startX, startY, WIDTH, HEIGHT, 0);
+        super.addAnimation(Entity.DEFAULT_ANIMATION_KEY, 1, startX, startY, WIDTH, HEIGHT, 0, false);
 
-        //create new list of locations
-        this.locations = new ArrayList<>();
+        //create new array of locations
+        this.locations = new Location[ROWS][COLUMNS];
         
         //setup the boundaries based on pixel color
         for (int col = 0; col < COLUMNS; col++)
@@ -71,10 +82,104 @@ public final class Map extends Entity implements Disposable
                     tmp.remove(Location.Wall.South);
                 }
                 
-                //add new location
-                locations.add(tmp);
+                //assign new location
+                locations[row][col] = tmp;
             }
         }
+    }
+    
+    /**
+     * Determine if the location is in bounds
+     * @param x x-coordinate
+     * @param y y-coordinate
+     * @return true if the location is not in the playable area
+     */
+    public boolean hasBounds(final double x, final double y)
+    {
+        final int row = getRow(y);
+        final int col = getColumn(x);
+        
+        return (col >= BOUNDARY_COL_MIN && col <= BOUNDARY_COL_MAX &&
+                row >= BOUNDARY_ROW_MIN && row <= BOUNDARY_ROW_MAX);
+    }
+    
+    /**
+     * Is there a solid block at this location
+     * @param x x-coordinate
+     * @param y y-coordinate
+     * @return true if the location at (x, y) has walls meaning it is a boundary
+     */
+    public boolean hasSolid(final double x, final double y)
+    {
+        final int row = getRow(y);
+        
+        //if out of bounds there will not be a solid block
+        if (row < BOUNDARY_ROW_MIN - 1 || row > BOUNDARY_ROW_MAX + 1)
+            return false;
+        
+        //if there is walls this is solid
+        return locations[row][getColumn(x)].hasWalls();
+    }
+    
+    public boolean hasNorthCollision(final double x, final double y)
+    {
+        final int col = getColumn(x);
+        final int row = getRow(y);
+        
+        //if not within columns there could never be collision
+        if (col < BOUNDARY_COL_MIN || col > BOUNDARY_COL_MAX)
+            return false;
+        
+        //never allow past the minimum row even if there is a floor gap above
+        if (row < BOUNDARY_ROW_MIN)
+            return true;
+        
+        return false;
+    }
+    
+    public boolean hasSouthCollision(final double x, final double y)
+    {
+        final int col = getColumn(x);
+        final int row = getRow(y);
+        
+        if (row > BOUNDARY_ROW_MAX)
+        {
+            //check if gap in floor
+            if (col >= FLOOR_GAP_START_COL_1 && col <= FLOOR_GAP_END_COL_1 || col >= FLOOR_GAP_START_COL_2 && col <= FLOOR_GAP_END_COL_2)
+            {
+                //return true if solid
+                return (hasSolid(x,y));
+            }
+            else
+            {
+                //every other column in this row wil be solid
+                return true;
+            }
+        }
+        
+        //no collision detected
+        return false;
+    }
+    
+    public boolean hasHorizontalCollision(final double x, final double y)
+    {
+        final int col = getColumn(x);
+        
+        //the sides will always
+        if (col < 2 || col > COLUMNS - 2)
+            return true;
+        
+        return hasSolid(x, y);
+    }
+    
+    private int getRow(final double y)
+    {
+        return (int)(y / BLOCK_SIZE);
+    }
+    
+    private int getColumn(final double x)
+    {
+        return (int)(x / BLOCK_SIZE);
     }
     
     /**
@@ -125,17 +230,22 @@ public final class Map extends Entity implements Disposable
      */
     protected void renderTest(final Graphics graphics)
     {
-        for (int i = 0; i < locations.size(); i++)
+        for (int col = 0; col < COLUMNS; col++)
         {
-            Location tmp = locations.get(i);
+            for (int row = 0; row < ROWS; row++)
+            {
+                //get temporary location
+                Location tmp = locations[row][col];
+                
+                if (!tmp.hasWalls())
+                    continue;
+
+                final int x = (int)(BLOCK_SIZE * tmp.getCol());
+                final int y = (int)(BLOCK_SIZE * tmp.getRow());
             
-            if (!tmp.hasWalls())
-                continue;
-            
-            final int x = (int)(BLOCK_SIZE * tmp.getCol());
-            final int y = (int)(BLOCK_SIZE * tmp.getRow());
-            graphics.setColor(Color.WHITE);
-            graphics.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
+                graphics.setColor(Color.WHITE);
+                graphics.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
+            }
         }
     }
 }

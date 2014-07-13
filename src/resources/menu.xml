@@ -28,7 +28,8 @@
         <pause>true</pause>
         <duration>15000</duration>
         <image>resources/images/menu/background.jpg</image>
-        <optionContainerRatio>0.90</optionContainerRatio>
+        <optionContainerRatio>0.95</optionContainerRatio>
+        <optionBorderThickness>1.5</optionBorderThickness>
         <title>Bubble Bobble 2</title>
         <backgroundMusicLocation></backgroundMusicLocation>
         <optionSoundLocation>resources/audio/menu/sound/selection.wav</optionSoundLocation>
@@ -44,7 +45,8 @@
         <pause>true</pause>
         <duration>10000</duration>
         <image>resources/images/menu/background.jpg</image>
-        <optionContainerRatio>0.90</optionContainerRatio>
+        <optionContainerRatio>0.95</optionContainerRatio>
+        <optionBorderThickness>1.5</optionBorderThickness>
         <title>Options</title>
         <backgroundMusicLocation></backgroundMusicLocation>
         <optionSoundLocation>resources/audio/menu/sound/selection.wav</optionSoundLocation>
@@ -83,7 +85,8 @@
         <pause>true</pause>
         <duration></duration>
         <image></image>
-        <optionContainerRatio>0.85</optionContainerRatio>
+        <optionContainerRatio>0.95</optionContainerRatio>
+        <optionBorderThickness>1.5</optionBorderThickness>
         <title>Options</title>
         <backgroundMusicLocation></backgroundMusicLocation>
         <optionSoundLocation>resources/audio/menu/sound/selection.wav</optionSoundLocation>
@@ -105,7 +108,8 @@
         <pause>true</pause>
         <duration></duration>
         <image></image>
-        <optionContainerRatio>0.85</optionContainerRatio>
+        <optionContainerRatio>0.95</optionContainerRatio>
+        <optionBorderThickness>1.5</optionBorderThickness>
         <title>Reset?</title>
         <options name="Yes" next="CreateNewGame" id="CreateNewGame"></options>
         <options name="No" next="OptionsInGame" id="OptionsInGame"></options>
@@ -118,7 +122,8 @@
         <pause>true</pause>
         <duration></duration>
         <image></image>
-        <optionContainerRatio>0.85</optionContainerRatio>
+        <optionContainerRatio>0.95</optionContainerRatio>
+        <optionBorderThickness>1.5</optionBorderThickness>
         <title>Leave?</title>
         <options name="Yes" next="ExitGameConfirmed" id="MainTitle"></options>
         <options name="No" next="OptionsInGame" id="OptionsInGame"></options>

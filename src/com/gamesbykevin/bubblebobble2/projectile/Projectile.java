@@ -9,6 +9,6 @@ public abstract class Projectile extends Entity implements Disposable
     @Override
     public void dispose()
     {
-        
+        super.dispose();
     }
 }
