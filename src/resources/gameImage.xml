@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<images>
+    <!--
+    <image id="Default">resources/images/game/Default.png</image>
+    -->
+    <image id="Maps">resources/images/game/Maps.png</image>
+    <image id="Heroes">resources/images/game/Heroes.png</image>
+</images>
