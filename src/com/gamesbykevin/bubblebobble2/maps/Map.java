@@ -36,6 +36,14 @@ public final class Map extends Entity implements Disposable
     //the array of locations in this map
     private Location[][] locations;
     
+    //where the hero1 will start
+    public static final int START_COL_HERO_1 = BOUNDARY_COL_MIN;
+    public static final int START_ROW_HERO_1 = BOUNDARY_ROW_MAX;
+    
+    //where the hero2 will start
+    public static final int START_COL_HERO_2 = BOUNDARY_COL_MAX;
+    public static final int START_ROW_HERO_2 = BOUNDARY_ROW_MAX;
+    
     /**
      * Create a new map with the specified background coordinates
      * @param startX x-coordinate of background
@@ -61,8 +69,8 @@ public final class Map extends Entity implements Disposable
                 Location tmp = new Location(col, row);
                 
                 //calculate the current pixel location
-                final int x = startX + (col * BLOCK_SIZE);
-                final int y = startY + (row * BLOCK_SIZE);
+                final int x = startX + getBlockX(col);
+                final int y = startY + getBlockY(row);
                 
                 //check if this location is a boundary
                 if (isBoundary(x, y, pixels))
@@ -92,15 +100,14 @@ public final class Map extends Entity implements Disposable
      * Determine if the location is in bounds
      * @param x x-coordinate
      * @param y y-coordinate
-     * @return true if the location is not in the playable area
+     * @return true if the location is in the playable area, false otherwise
      */
     public boolean hasBounds(final double x, final double y)
     {
         final int row = getRow(y);
         final int col = getColumn(x);
         
-        return (col >= BOUNDARY_COL_MIN && col <= BOUNDARY_COL_MAX &&
-                row >= BOUNDARY_ROW_MIN && row <= BOUNDARY_ROW_MAX);
+        return (col >= BOUNDARY_COL_MIN && col <= BOUNDARY_COL_MAX && row <= BOUNDARY_ROW_MAX);
     }
     
     /**
@@ -121,26 +128,14 @@ public final class Map extends Entity implements Disposable
         return locations[row][getColumn(x)].hasWalls();
     }
     
-    public boolean hasNorthCollision(final double x, final double y)
-    {
-        final int col = getColumn(x);
-        final int row = getRow(y);
-        
-        //if not within columns there could never be collision
-        if (col < BOUNDARY_COL_MIN || col > BOUNDARY_COL_MAX)
-            return false;
-        
-        //never allow past the minimum row even if there is a floor gap above
-        if (row < BOUNDARY_ROW_MIN)
-            return true;
-        
-        return false;
-    }
-    
     public boolean hasSouthCollision(final double x, final double y)
     {
         final int col = getColumn(x);
         final int row = getRow(y);
+        
+        //no south collision when at top
+        if (row <= BOUNDARY_ROW_MIN)
+            return false;
         
         if (row > BOUNDARY_ROW_MAX)
         {
@@ -157,17 +152,21 @@ public final class Map extends Entity implements Disposable
             }
         }
         
-        //no collision detected
-        return false;
+        //check if location is solid
+        return hasSolid(x, y);
     }
     
     public boolean hasHorizontalCollision(final double x, final double y)
     {
         final int col = getColumn(x);
+        final int row = getRow(y);
         
         //the sides will always
-        if (col < 2 || col > COLUMNS - 2)
+        if (col < BOUNDARY_COL_MIN || col > BOUNDARY_COL_MAX)
             return true;
+        
+        if (row <= BOUNDARY_ROW_MIN)
+            return false;
         
         return hasSolid(x, y);
     }
@@ -187,7 +186,7 @@ public final class Map extends Entity implements Disposable
      * @param x x-coordinate north-west corner
      * @param y y-coordinate north-west corner
      * @param pixels int[] array containing pixel data
-     * @return true if this location is a boundary, false otherwise
+     * @return true if this location is a solid boundary, false otherwise
      */
     private boolean isBoundary(final int x, final int y, final int[] pixels)
     {
@@ -225,6 +224,26 @@ public final class Map extends Entity implements Disposable
     }
     
     /**
+     * Get the x-coordinate 
+     * @param col The column we want to check
+     * @return the x-coordinate where the column is located
+     */
+    public static int getBlockX(final double col)
+    {
+        return (int)(BLOCK_SIZE * col);
+    }
+    
+    /**
+     * Get the y-coordinate 
+     * @param row The Row we want to check
+     * @return the y-coordinate where the row is located
+     */
+    public static int getBlockY(final double row)
+    {
+        return (int)(BLOCK_SIZE * row);
+    }
+    
+    /**
      * This is to display a visual of the boundaries for testing
      * @param graphics 
      */
@@ -240,8 +259,8 @@ public final class Map extends Entity implements Disposable
                 if (!tmp.hasWalls())
                     continue;
 
-                final int x = (int)(BLOCK_SIZE * tmp.getCol());
-                final int y = (int)(BLOCK_SIZE * tmp.getRow());
+                final int x = getBlockX(tmp.getCol());
+                final int y = getBlockY(tmp.getRow());
             
                 graphics.setColor(Color.WHITE);
                 graphics.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);

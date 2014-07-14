@@ -206,7 +206,7 @@ public final class Maps implements Disposable, IElement
         else
         {
             //draw map
-            if (Shared.DEBUG)
+            if (!Shared.DEBUG)
             {
                 getMap().renderTest(graphics);
             }

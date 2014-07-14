@@ -27,6 +27,10 @@ public final class Input
      */
     public static void update(final Character character, final Keyboard keyboard)
     {
+        //if the character is starting don't check input yet
+        if (character.isStarting())
+            return;
+        
         //can only press left or right
         if (keyboard.hasKeyPressed(KEY_LEFT))
         {
@@ -85,21 +89,10 @@ public final class Input
         
         if (keyboard.hasKeyPressed(KEY_JUMP))
         {
-            if (keyboard.hasKeyPressed(KEY_DOWN))
+            if (character.canJump())
             {
-                if (character.canFall())
-                {
-                    character.setFall(true);
-                    character.setVelocityY(Character.MAX_SPEED_JUMP);
-                }
-            }
-            else
-            {
-                if (character.canJump())
-                {
-                    character.setJump(true);
-                    character.setVelocityY(-Character.MAX_SPEED_JUMP);
-                }
+                character.setJump(true);
+                character.setVelocityY(-Character.MAX_SPEED_JUMP);
             }
         }
         

@@ -4,8 +4,8 @@ import com.gamesbykevin.framework.util.Timers;
 
 import com.gamesbykevin.bubblebobble2.character.Character;
 import com.gamesbykevin.bubblebobble2.engine.Engine;
+import com.gamesbykevin.bubblebobble2.maps.Map;
 import com.gamesbykevin.bubblebobble2.shared.IElement;
-
 
 public final class Hero extends Character implements IElement
 {
@@ -25,7 +25,7 @@ public final class Hero extends Character implements IElement
     private static final long DELAY_WALK = Timers.toNanoSeconds(175L);
     private static final long DELAY_JUMP = Timers.toNanoSeconds(250L);
     private static final long DELAY_FALL = Timers.toNanoSeconds(250L);
-    private static final long DELAY_ATTACK = Timers.toNanoSeconds(1000L);
+    private static final long DELAY_ATTACK = Timers.toNanoSeconds(450L);
     private static final long DELAY_DIE = Timers.toNanoSeconds(333L);
     private static final long DELAY_START = Timers.toNanoSeconds(500L);
     
@@ -43,6 +43,7 @@ public final class Hero extends Character implements IElement
                 super.addAnimation(Animations.Attack, 1, 0,  32, 16, 16, DELAY_ATTACK, false);
                 super.addAnimation(Animations.Die,    6, 0,  48, 16, 16, DELAY_DIE, false);
                 super.addAnimation(Animations.Start,  2, 0,  80, 28, 32, DELAY_START, true);
+                super.setDestination(Map.getBlockX(Map.START_COL_HERO_1), Map.getBlockY(Map.START_ROW_HERO_1));
                 break;
                 
             case Hero2:
@@ -53,12 +54,14 @@ public final class Hero extends Character implements IElement
                 super.addAnimation(Animations.Attack, 1, 0,  144, 16, 16, DELAY_ATTACK, false);
                 super.addAnimation(Animations.Die,    6, 0,  160, 16, 16, DELAY_DIE, false);
                 super.addAnimation(Animations.Start,  2, 0,  192, 28, 32, DELAY_START, true);
+                super.setDestination(Map.getBlockX(Map.START_COL_HERO_2), Map.getBlockY(Map.START_ROW_HERO_2));
+                super.setHorizontalFlip(true);
                 break;
         }
         
         super.resetVelocity();
-        super.setAnimation(Animations.Idle);
         super.setDimensions();
+        super.setStart(true);
     }
     
     @Override
@@ -74,6 +77,9 @@ public final class Hero extends Character implements IElement
     {
         if (!isAttacking())
         {
+            if (isStarting())
+                setAnimation(Animations.Start);
+            
             if (isIdle())
                 setAnimation(Animations.Idle);
 

@@ -17,7 +17,7 @@ public abstract class Character extends Entity implements Disposable
     private double speedWalk, speedRun;
     
     //track what we are doing for the character
-    private boolean idle = true, walk = false, jump = false, fall = false, attack = false, dead = false;
+    private boolean idle = false, walk = false, jump = false, fall = false, attack = false, dead = false, start = true;
     
     //the max speed a character can fall
     private static final double MAX_SPEED_FALL = 1;
@@ -28,10 +28,34 @@ public abstract class Character extends Entity implements Disposable
     //the rate at which to increase/decrease y-velocity
     private static final double VELOCITY_Y_CHANGE = .25;
     
+    //where to place the character
+    private double destinationX, destinationY;
+    
     protected Character(final double speedWalk, final double speedRun)
     {
         this.speedWalk = speedWalk;
         this.speedRun = speedRun;
+    }
+    
+    /**
+     * Set the destination where the character will be placed
+     * @param destinationX x-coordinate
+     * @param destinationY y-coordinate
+     */
+    public void setDestination(final double destinationX, final double destinationY)
+    {
+        this.destinationX = destinationX;
+        this.destinationY = destinationY;
+    }
+    
+    protected double getDestinationX()
+    {
+        return this.destinationX;
+    }
+    
+    protected double getDestinationY()
+    {
+        return this.destinationY;
     }
     
     public double getSpeedRun()
@@ -46,12 +70,26 @@ public abstract class Character extends Entity implements Disposable
     
     private void reset()
     {
+        setStart(false);
         setIdle(false);
         setWalk(false);
         setJump(false);
         setFall(false);
         setAttack(false);
         setDead(false);
+    }
+    
+    public void setStart(final boolean start)
+    {
+        if (start)
+            reset();
+        
+        this.start = start;
+    }
+    
+    public boolean isStarting()
+    {
+        return this.start;
     }
     
     public void setIdle(final boolean idle)
@@ -160,25 +198,92 @@ public abstract class Character extends Entity implements Disposable
     
     protected void update(final Map map, final long time)
     {
-        //apply gravity
-        applyGravity(map);
-        
-        //check for side collision
-        checkHorizontalCollision(map);
-        
-        //check for ceiling collision
-        checkVerticalCollision(map);
-        
-        //perform any final adjustments to ensure character is in bounds
-        checkLocation(map);
+        //make sure the character is not being placed
+        if (!isStarting())
+        {
+            //apply gravity
+            applyGravity(map);
+
+            //check for side collision
+            checkHorizontalCollision(map);
+
+            //perform any final adjustments to ensure character is in bounds
+            checkLocation(map);
+            
+            if (projectile != null)
+            {
+                //update location and animation of projectile
+                projectile.update(time);
+            }
+        }
+        else
+        {
+            //go to our destination
+            locateDestination();
+        }
         
         //update location and animation
         super.update(time);
-        
-        if (projectile != null)
+    }
+    
+    private void locateDestination()
+    {
+        if (getX() < getDestinationX())
         {
-            //update location and animation of projectile
-            projectile.update(time);
+            if (getX() + getSpeedWalk() > getDestinationX())
+            {
+                setX(getDestinationX());
+                resetVelocityX();
+            }
+            else
+            {
+                setVelocityX(getSpeedWalk());
+            }
+        }
+        else if (getX() > getDestinationX())
+        {
+            if (getX() - getSpeedWalk() < getDestinationX())
+            {
+                setX(getDestinationX());
+                resetVelocityX();
+            }
+            else
+            {
+                setVelocityX(-getSpeedWalk());
+            }
+        }
+        
+        if (getY() < getDestinationY())
+        {
+            if (getY() + getSpeedWalk() > getDestinationY())
+            {
+                setY(getDestinationY());
+                resetVelocityY();
+            }
+            else
+            {
+                setVelocityY(getSpeedWalk());
+            }
+        }
+        else if (getY() > getDestinationY())
+        {
+            if (getY() - getSpeedWalk() < getDestinationY())
+            {
+                setY(getDestinationY());
+                resetVelocityY();
+            }
+            else
+            {
+                setVelocityY(-getSpeedWalk());
+            }
+        }
+        
+        //if we have reached our destination
+        if (getX() == getDestinationX() && getY() == getDestinationY())
+        {
+            //now idle, and stop moving
+            setIdle(true);
+            resetVelocity();
         }
     }
     
@@ -197,23 +302,6 @@ public abstract class Character extends Entity implements Disposable
                 //check to see if needs to be reset at top
                 if (getY() + (getHeight() / 2) >= Map.ROWS * Map.BLOCK_SIZE)
                     setY(-getHeight());
-            }
-        }
-    }
-    
-    private void checkVerticalCollision(final Map map)
-    {
-        if (super.hasVelocityY())
-        {
-            if (super.getVelocityY() > 0)
-            {
-                if (map.hasSouthCollision(getX(), getY() + (getHeight() / 2)))
-                    super.resetVelocityY();
-            }
-            else
-            {
-                if (map.hasNorthCollision(getX(), getY() - (getHeight() / 2)))
-                    super.resetVelocityY();
             }
         }
     }
@@ -241,13 +329,10 @@ public abstract class Character extends Entity implements Disposable
      */
     private void applyGravity(final Map map)
     {
-        //get the y coordinate at bottom
-        final double y = getY() + (getHeight() / 2);
-        
-        //get the middle x coordinate
-        final double x = getX();
-        
-        if (map.hasSolid(x, y) && !isJumping())
+        if (map.hasSouthCollision(getX(), getY() + (getHeight() / 2)) && 
+            !map.hasSouthCollision(getX(), getY() - (getHeight() / 2)) && 
+            !map.hasSouthCollision(getX(), getY()) && 
+            !isJumping())
         {
             //stop falling
             resetVelocityY();
