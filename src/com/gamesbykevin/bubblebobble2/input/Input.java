@@ -96,12 +96,16 @@ public final class Input
             }
         }
         
-        if (keyboard.hasKeyPressed(KEY_FIRE))
+        if (keyboard.hasKeyReleased(KEY_FIRE))
         {
             if (character.canAttack())
             {
                 character.setAttack(true);
+                character.addProjectile();
             }
+            
+            //stop firing
+            keyboard.removeKeyReleased(KEY_FIRE);
         }
     }
 }

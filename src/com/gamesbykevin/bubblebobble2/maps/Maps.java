@@ -97,7 +97,7 @@ public final class Maps implements Disposable, IElement
     private void create()
     {
         //determine the next map to create
-        final int next = maps.size();
+        final int next = progress.getCount();
         
         //calculate column, row
         final int column = next - ((next / MAPS_PER_COLUMN) * MAPS_PER_COLUMN);
@@ -107,16 +107,23 @@ public final class Maps implements Disposable, IElement
         final int x = START_X + (column * (PIXEL_SPACE + Map.WIDTH));
         final int y = START_Y + (row *    (PIXEL_SPACE + Map.HEIGHT));
         
-        //create new map with background at (x,y)
-        final Map map = new Map(x, y, pixels);
+        try
+        {
+            //create new map with background at (x,y) and map the boundaries
+            final Map map = new Map(x, y, pixels);
+
+            //each map will be placed one after the other
+            map.setLocation(0, next * Map.HEIGHT);
+
+            //add map to list
+            maps.add(map);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
         
-        //each map will be placed one after the other
-        map.setLocation(0, next * Map.HEIGHT);
-        
-        //add map to list
-        maps.add(map);
-        
-        //increase progress
+        //increase progress regardless of error
         progress.increase();
     }
     
@@ -195,6 +202,11 @@ public final class Maps implements Disposable, IElement
         }
     }
     
+    /**
+     * Draw the map.<br>
+     * If the maps haven't been created yet draw the progress
+     * @param graphics Object used to draw graphics
+     */
     @Override
     public void render(final Graphics graphics)
     {

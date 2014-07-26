@@ -5,4 +5,6 @@
     -->
     <image id="Maps">resources/images/game/Maps.png</image>
     <image id="Heroes">resources/images/game/Heroes.png</image>
+    <image id="Enemies">resources/images/game/Enemies.png</image>
+    <image id="Bonus">resources/images/game/Bonus.png</image>
 </images>

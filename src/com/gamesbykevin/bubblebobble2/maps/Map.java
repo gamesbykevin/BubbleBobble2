@@ -1,5 +1,6 @@
 package com.gamesbykevin.bubblebobble2.maps;
 
+import com.gamesbykevin.framework.base.Cell;
 import com.gamesbykevin.framework.labyrinth.Location;
 import com.gamesbykevin.framework.resources.Disposable;
 
@@ -7,6 +8,7 @@ import com.gamesbykevin.bubblebobble2.entity.Entity;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Point;
 
 public final class Map extends Entity implements Disposable
 {
@@ -20,6 +22,9 @@ public final class Map extends Entity implements Disposable
     //the dimension size of 8 x 8 blocks in each map
     public static final int COLUMNS = 32;
     public static final int ROWS = 24;
+    
+    //the minimum number of blocks required for a map
+    private static final int MINIMUM_BLOCK_REQUIREMENT = (ROWS * 4) + ((COLUMNS - 12) * 2);
     
     //each map has boundaries where gameplay takes place
     private static final int BOUNDARY_COL_MIN = 2;
@@ -44,18 +49,25 @@ public final class Map extends Entity implements Disposable
     public static final int START_COL_HERO_2 = BOUNDARY_COL_MAX;
     public static final int START_ROW_HERO_2 = BOUNDARY_ROW_MAX;
     
+    //coordinate where map starts
+    private final int startX, startY;
+    
+    //the location of the starting place for the heroes on both sides
+    private Point startWest = null, startEast = null; 
+    
     /**
      * Create a new map with the specified background coordinates
      * @param startX x-coordinate of background
      * @param startY y-coordinate of background
      * @param pixels The array containing all of the pixels in the level
+     * @throws Exception Exception will be thrown if the map doesn't have the required number of solid blocks
      */
-    protected Map(final int startX, final int startY, final int[] pixels)
+    protected Map(final int startX, final int startY, final int[] pixels) throws Exception
     {
         super.setDimensions(WIDTH, HEIGHT);
         
-        //the background map is static and won't change
-        super.addAnimation(Entity.DEFAULT_ANIMATION_KEY, 1, startX, startY, WIDTH, HEIGHT, 0, false);
+        this.startX = startX;
+        this.startY = startY;
 
         //create new array of locations
         this.locations = new Location[ROWS][COLUMNS];
@@ -94,6 +106,96 @@ public final class Map extends Entity implements Disposable
                 locations[row][col] = tmp;
             }
         }
+        
+        //make sure this map has the required number of solid blocks
+        if (getBlockCount() < MINIMUM_BLOCK_REQUIREMENT)
+            throw new Exception("Map did not meet the required # of solid blocks (" + startX + "," + startY + ")");
+        
+        //start at bottom row
+        for (int row = BOUNDARY_ROW_MAX - 1; row >= BOUNDARY_ROW_MIN; row--)
+        {
+            //only check if location hasn't been found
+            if (startWest == null)
+            {
+                for (int col = BOUNDARY_COL_MIN; col <= (COLUMNS / 2); col++)
+                {
+                    //if all blocks aren't solid, this is a valid place
+                    if (!isSolid(col, row) && !isSolid(col + 1, row) && !isSolid(col, row + 1) && !isSolid(col + 1, row + 1))
+                    {
+                        startWest = new Point(BLOCK_SIZE * (col + 1), BLOCK_SIZE * (row + 1));
+                        break;
+                    }
+                }
+            }
+            
+            //only check if location hasn't been found
+            if (startEast == null)
+            {
+                for (int col = BOUNDARY_COL_MAX - 1; col >= (COLUMNS / 2); col--)
+                {
+                    //if all blocks aren't solid, this is a valid place
+                    if (!isSolid(col, row) && !isSolid(col + 1, row) && !isSolid(col, row + 1) && !isSolid(col + 1, row + 1))
+                    {
+                        startEast = new Point(BLOCK_SIZE * (col + 1), BLOCK_SIZE * (row + 1));
+                        break;
+                    }
+                }
+            }
+            
+            //don't continue if both locations have been found
+            if (startWest != null && startEast != null)
+                break;
+        }
+        
+        //setup animation
+        setupAnimations();
+    }
+    
+    /**
+     * Get the hero starting point
+     * @return The (x,y) location where the hero is to start on the west side
+     */
+    public Point getStartWest()
+    {
+        return this.startWest;
+    }
+    
+    /**
+     * Get the hero starting point
+     * @return The (x,y) location where the hero is to start on the east side
+     */
+    public Point getStartEast()
+    {
+        return this.startEast;
+    }
+    
+    @Override
+    protected void setupAnimations()
+    {
+        //the background map is static and won't change, so it is 1 frame and 1 animation
+        super.addAnimation(Entity.DEFAULT_ANIMATION_KEY, 1, startX, startY, WIDTH, HEIGHT, 0, false);
+    }
+    
+    /**
+     * Get the block count
+     * @return The total number of solid blocks
+     */
+    private int getBlockCount()
+    {
+        int count = 0;
+        
+        for (int col = 0; col < COLUMNS; col++)
+        {
+            for (int row = 0; row < ROWS; row++)
+            {
+                //if this location has walls it is a solid block
+                if (isSolid(col, row))
+                    count++;
+            }
+        }
+        
+        //return the count
+        return count;
     }
     
     /**
@@ -111,21 +213,33 @@ public final class Map extends Entity implements Disposable
     }
     
     /**
-     * Is there a solid block at this location
-     * @param x x-coordinate
-     * @param y y-coordinate
-     * @return true if the location at (x, y) has walls meaning it is a boundary
+     * Is the location solid?
+     * @param col Column
+     * @param row Row
+     * @return true if the location has walls, false otherwise
      */
-    public boolean hasSolid(final double x, final double y)
+    private boolean isSolid(final int col, final int row)
     {
-        final int row = getRow(y);
-        
-        //if out of bounds there will not be a solid block
-        if (row < BOUNDARY_ROW_MIN - 1 || row > BOUNDARY_ROW_MAX + 1)
+        if (row < 0 || row >= locations.length)
             return false;
         
-        //if there is walls this is solid
-        return locations[row][getColumn(x)].hasWalls();
+        if (col < 0 || col >= locations[0].length)
+            return false;
+        
+        return locations[row][col].hasWalls();
+    }
+    
+    public boolean hasNorthCollision(final double x, final double y)
+    {
+        final int col = getColumn(x);
+        final int row = getRow(y);
+        
+        //north collision when close to top
+        if (row < BOUNDARY_ROW_MIN)
+            return true;
+        
+        //return true if solid
+        return (isSolid(col, row));
     }
     
     public boolean hasSouthCollision(final double x, final double y)
@@ -143,7 +257,7 @@ public final class Map extends Entity implements Disposable
             if (col >= FLOOR_GAP_START_COL_1 && col <= FLOOR_GAP_END_COL_1 || col >= FLOOR_GAP_START_COL_2 && col <= FLOOR_GAP_END_COL_2)
             {
                 //return true if solid
-                return (hasSolid(x,y));
+                return (isSolid(col,row));
             }
             else
             {
@@ -153,7 +267,7 @@ public final class Map extends Entity implements Disposable
         }
         
         //check if location is solid
-        return hasSolid(x, y);
+        return isSolid(col, row);
     }
     
     public boolean hasHorizontalCollision(final double x, final double y)
@@ -168,7 +282,7 @@ public final class Map extends Entity implements Disposable
         if (row <= BOUNDARY_ROW_MIN)
             return false;
         
-        return hasSolid(x, y);
+        return isSolid(col, row);
     }
     
     private int getRow(final double y)
@@ -256,7 +370,7 @@ public final class Map extends Entity implements Disposable
                 //get temporary location
                 Location tmp = locations[row][col];
                 
-                if (!tmp.hasWalls())
+                if (!isSolid(col, row))
                     continue;
 
                 final int x = getBlockX(tmp.getCol());

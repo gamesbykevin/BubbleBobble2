@@ -9,6 +9,7 @@ import com.gamesbykevin.framework.resources.ImageManager;
 import com.gamesbykevin.bubblebobble2.engine.Engine;
 import com.gamesbykevin.bubblebobble2.resources.Resources;
 import com.gamesbykevin.bubblebobble2.shared.IElement;
+import com.gamesbykevin.bubblebobble2.shared.Shared;
 
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
@@ -92,6 +93,10 @@ public final class CustomMenu extends Menu implements IElement
         
         //set the first layer
         super.setLayer(LayerKey.Initial);
+        
+        //if debugging go straight to game
+        if (Shared.DEBUG)
+            super.setLayer(LayerKey.GameStart);
         
         //set the last layer so we know when the menu has completed
         super.setFinish(LayerKey.GameStart);

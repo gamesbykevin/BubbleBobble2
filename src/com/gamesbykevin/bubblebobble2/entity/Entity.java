@@ -4,6 +4,8 @@ import com.gamesbykevin.framework.base.Animation;
 import com.gamesbykevin.framework.base.Sprite;
 import com.gamesbykevin.framework.resources.Disposable;
 
+import java.awt.Graphics;
+
 public abstract class Entity extends Sprite implements Disposable
 {
     //default animation key
@@ -14,6 +16,11 @@ public abstract class Entity extends Sprite implements Disposable
         //create sprite sheet
         super.createSpriteSheet();
     }
+    
+    /**
+     * Setup the animations for the entity
+     */
+    protected abstract void setupAnimations();
     
     @Override
     public void dispose()
@@ -92,6 +99,15 @@ public abstract class Entity extends Sprite implements Disposable
     }
     
     /**
+     * Has the animation finished
+     * @return true if the current animation has finished, false otherwise
+     */
+    public boolean isAnimationFinished()
+    {
+        return (super.getSpriteSheet().hasFinished());
+    }
+    
+    /**
      * Update the location and animation.
      * @param time The time deduction per frame (nanoseconds)
      */
@@ -109,5 +125,23 @@ public abstract class Entity extends Sprite implements Disposable
         {
             e.printStackTrace();
         }
+    }
+    
+    public void render(final Graphics graphics)
+    {
+        //store original location
+        final double x = getX();
+        final double y = getY();
+        
+        //off-set location
+        super.setX(x - (getWidth() / 2));
+        super.setY(y - (getHeight() / 2));
+        
+        //draw character
+        super.draw(graphics);
+        
+        //reset location
+        super.setX(x);
+        super.setY(y);
     }
 }

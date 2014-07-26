@@ -3,29 +3,33 @@ package com.gamesbykevin.bubblebobble2.hero;
 import com.gamesbykevin.framework.util.Timers;
 
 import com.gamesbykevin.bubblebobble2.character.Character;
-import com.gamesbykevin.bubblebobble2.engine.Engine;
-import com.gamesbykevin.bubblebobble2.maps.Map;
-import com.gamesbykevin.bubblebobble2.shared.IElement;
+import com.gamesbykevin.bubblebobble2.projectile.*;
 
-public final class Hero extends Character implements IElement
+public final class Hero extends Character
 {
     public enum Type
     {
         Hero1, Hero2
     }
     
+    //the type of hero
+    private Type type;
+    
     public enum Animations
     {
         Idle, Walk, Jump, Fall, Attack, Die, Start
     }
     
-    private static final double SPEED_WALK = 1;
+    //the max number of projectiles
+    private static final int PROJECTILE_LIMIT = 5;
+    
+    public static final double SPEED_WALK = 1;
     
     private static final long DELAY_NONE = 0;
     private static final long DELAY_WALK = Timers.toNanoSeconds(175L);
     private static final long DELAY_JUMP = Timers.toNanoSeconds(250L);
     private static final long DELAY_FALL = Timers.toNanoSeconds(250L);
-    private static final long DELAY_ATTACK = Timers.toNanoSeconds(450L);
+    private static final long DELAY_ATTACK = Timers.toNanoSeconds(333L);
     private static final long DELAY_DIE = Timers.toNanoSeconds(333L);
     private static final long DELAY_START = Timers.toNanoSeconds(500L);
     
@@ -33,6 +37,24 @@ public final class Hero extends Character implements IElement
     {
         super(SPEED_WALK, SPEED_WALK);
         
+        //store type of hero
+        this.type = type;
+        
+        //set the projectile limit
+        setProjectileLimit(PROJECTILE_LIMIT);
+        
+        //setup animations
+        setupAnimations();
+    }
+    
+    public Type getType()
+    {
+        return this.type;
+    }
+    
+    @Override
+    protected void setupAnimations()
+    {
         switch (type)
         {
             case Hero1:
@@ -43,7 +65,6 @@ public final class Hero extends Character implements IElement
                 super.addAnimation(Animations.Attack, 1, 0,  32, 16, 16, DELAY_ATTACK, false);
                 super.addAnimation(Animations.Die,    6, 0,  48, 16, 16, DELAY_DIE, false);
                 super.addAnimation(Animations.Start,  2, 0,  80, 28, 32, DELAY_START, true);
-                super.setDestination(Map.getBlockX(Map.START_COL_HERO_1), Map.getBlockY(Map.START_ROW_HERO_1));
                 break;
                 
             case Hero2:
@@ -54,26 +75,37 @@ public final class Hero extends Character implements IElement
                 super.addAnimation(Animations.Attack, 1, 0,  144, 16, 16, DELAY_ATTACK, false);
                 super.addAnimation(Animations.Die,    6, 0,  160, 16, 16, DELAY_DIE, false);
                 super.addAnimation(Animations.Start,  2, 0,  192, 28, 32, DELAY_START, true);
-                super.setDestination(Map.getBlockX(Map.START_COL_HERO_2), Map.getBlockY(Map.START_ROW_HERO_2));
                 super.setHorizontalFlip(true);
                 break;
         }
         
+        //stop movement
         super.resetVelocity();
+        
+        //set dimensions
         super.setDimensions();
+        
+        //flag we are starting
         super.setStart(true);
     }
     
     @Override
-    public void update(final Engine engine)
+    public void addProjectile()
     {
-        super.update(engine.getManager().getMaps().getMap(), engine.getMain().getTime());
+        final Projectile projectile = new Bubble(!hasHorizontalFlip());
         
-        //set the correct animation
-        correctAnimation();
+        //set the location
+        projectile.setLocation(getX(), getY());
+        
+        //set the image of the projectile
+        projectile.setImage(getImage());
+        
+        //add projectile
+        super.addProjectile(projectile);
     }
     
-    private void correctAnimation()
+    @Override
+    protected void correctAnimation()
     {
         if (!isAttacking())
         {
@@ -102,7 +134,7 @@ public final class Hero extends Character implements IElement
                 setAnimation(Animations.Attack, true);
             
             //if animation finished
-            if (getSpriteSheet().hasFinished())
+            if (isAnimationFinished())
             {
                 //set to idle
                 setAnimation(Animations.Idle);

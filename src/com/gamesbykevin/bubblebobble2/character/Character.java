@@ -2,19 +2,30 @@ package com.gamesbykevin.bubblebobble2.character;
 
 import com.gamesbykevin.framework.resources.Disposable;
 
+import com.gamesbykevin.bubblebobble2.engine.Engine;
 import com.gamesbykevin.bubblebobble2.entity.Entity;
 import com.gamesbykevin.bubblebobble2.maps.Map;
 import com.gamesbykevin.bubblebobble2.projectile.Projectile;
+import com.gamesbykevin.bubblebobble2.shared.IElement;
 
 import java.awt.Graphics;
+import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
 
-public abstract class Character extends Entity implements Disposable
+public abstract class Character extends Entity implements Disposable, IElement
 {
     //the projectile the character throws
-    private Projectile projectile;
+    private List<Projectile> projectiles;
+    
+    //how many projectiles are we limited to, default is 1
+    private int limit = 1;
     
     //the speed at which to walk, run
     private double speedWalk, speedRun;
+    
+    //no movement
+    public static final double SPEED_NONE = 0;
     
     //track what we are doing for the character
     private boolean idle = false, walk = false, jump = false, fall = false, attack = false, dead = false, start = true;
@@ -33,8 +44,27 @@ public abstract class Character extends Entity implements Disposable
     
     protected Character(final double speedWalk, final double speedRun)
     {
+        //set the speed
         this.speedWalk = speedWalk;
-        this.speedRun = speedRun;
+        this.speedRun  = speedRun;
+        
+        //create container for projectiles
+        this.projectiles = new ArrayList<>();
+    }
+    
+    private List<Projectile> getProjectiles()
+    {
+        return this.projectiles;
+    }
+    
+    public void setProjectileLimit(final int limit)
+    {
+        this.limit = limit;
+    }
+    
+    private int getProjectileLimit()
+    {
+        return this.limit;
     }
     
     /**
@@ -42,10 +72,10 @@ public abstract class Character extends Entity implements Disposable
      * @param destinationX x-coordinate
      * @param destinationY y-coordinate
      */
-    public void setDestination(final double destinationX, final double destinationY)
+    public void setDestination(final Point destination)
     {
-        this.destinationX = destinationX;
-        this.destinationY = destinationY;
+        this.destinationX = destination.x;
+        this.destinationY = destination.y;
     }
     
     protected double getDestinationX()
@@ -146,7 +176,7 @@ public abstract class Character extends Entity implements Disposable
     
     public boolean canAttack()
     {
-        return (!isAttacking() && !isDead());
+        return (!isAttacking() && !isDead() && getProjectiles().size() < getProjectileLimit());
     }
     
     public boolean canWalk()
@@ -196,8 +226,21 @@ public abstract class Character extends Entity implements Disposable
         super.dispose();
     }
     
-    protected void update(final Map map, final long time)
+    /**
+     * Make sure the appropriate animation is set
+     */
+    protected abstract void correctAnimation();
+    
+    /**
+     * Add projectile
+     */
+    public abstract void addProjectile();
+    
+    @Override
+    public void update(final Engine engine)
     {
+        final Map map = engine.getManager().getMaps().getMap();
+        
         //make sure the character is not being placed
         if (!isStarting())
         {
@@ -210,10 +253,23 @@ public abstract class Character extends Entity implements Disposable
             //perform any final adjustments to ensure character is in bounds
             checkLocation(map);
             
-            if (projectile != null)
+            if (!getProjectiles().isEmpty())
             {
-                //update location and animation of projectile
-                projectile.update(time);
+                for (int i = 0; i < getProjectiles().size(); i++)
+                {
+                    //manage the collision of projectile with the parent that created it
+                    getProjectiles().get(i).checkParentCollision(this);
+                    
+                    //update projectile
+                    getProjectiles().get(i).update(engine);
+                    
+                    //if we can discard the projectile
+                    if (getProjectiles().get(i).canDiscard())
+                    {
+                        getProjectiles().remove(i);
+                        i--;
+                    }
+                }
             }
         }
         else
@@ -223,7 +279,19 @@ public abstract class Character extends Entity implements Disposable
         }
         
         //update location and animation
-        super.update(time);
+        update(engine.getMain().getTime());
+        
+        //set the correct animation
+        correctAnimation();
+    }
+    
+    /**
+     * Add projectile to list
+     * @param projectile Projectile we want to add into play
+     */
+    protected void addProjectile(final Projectile projectile)
+    {
+        getProjectiles().add(projectile);
     }
     
     private void locateDestination()
@@ -242,7 +310,7 @@ public abstract class Character extends Entity implements Disposable
         }
         else if (getX() > getDestinationX())
         {
-            if (getX() - getSpeedWalk() < getDestinationX())
+            if (getX() - getSpeedWalk() <= getDestinationX())
             {
                 setX(getDestinationX());
                 resetVelocityX();
@@ -267,7 +335,7 @@ public abstract class Character extends Entity implements Disposable
         }
         else if (getY() > getDestinationY())
         {
-            if (getY() - getSpeedWalk() < getDestinationY())
+            if (getY() - getSpeedWalk() <= getDestinationY())
             {
                 setY(getDestinationY());
                 resetVelocityY();
@@ -329,10 +397,14 @@ public abstract class Character extends Entity implements Disposable
      */
     private void applyGravity(final Map map)
     {
-        if (map.hasSouthCollision(getX(), getY() + (getHeight() / 2)) && 
-            !map.hasSouthCollision(getX(), getY() - (getHeight() / 2)) && 
-            !map.hasSouthCollision(getX(), getY()) && 
-            !isJumping())
+        //we hit the ground if there is south collision and we are not jumping
+        final boolean hitGround = map.hasSouthCollision(getX(), getY() + (getHeight() / 2)) && !isJumping();
+        
+        //is the character stuck in a block
+        final boolean stuck = map.hasSouthCollision(getX(), getY() + (getHeight() / 2)) && map.hasSouthCollision(getX(), getY());
+        
+        //if we hit the ground and we are not stuck
+        if (hitGround && !stuck)
         {
             //stop falling
             resetVelocityY();
@@ -376,24 +448,17 @@ public abstract class Character extends Entity implements Disposable
         }
     }
     
+    @Override
     public void render(final Graphics graphics)
     {
-        final double x = getX();
-        final double y = getY();
-        
-        super.setX(x - (getWidth() / 2));
-        super.setY(y - (getHeight() / 2));
-        
-        //draw character
-        super.draw(graphics);
-        
-        super.setX(x);
-        super.setY(y);
-        
-        if (projectile != null)
+        if (!getProjectiles().isEmpty())
         {
-            //draw projectile
-            projectile.draw(graphics, getImage());
+            for (int i = 0; i < getProjectiles().size(); i++)
+            {
+                getProjectiles().get(i).render(graphics);
+            }
         }
+        
+        super.render(graphics);
     }
 }

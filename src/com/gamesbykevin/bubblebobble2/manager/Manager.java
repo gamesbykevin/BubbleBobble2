@@ -3,6 +3,8 @@ package com.gamesbykevin.bubblebobble2.manager;
 import com.gamesbykevin.framework.menu.Menu;
 import com.gamesbykevin.framework.util.*;
 
+import com.gamesbykevin.bubblebobble2.bonus.Bonuses;
+import com.gamesbykevin.bubblebobble2.enemies.Enemies;
 import com.gamesbykevin.bubblebobble2.engine.Engine;
 import com.gamesbykevin.bubblebobble2.hero.Hero;
 import com.gamesbykevin.bubblebobble2.input.Input;
@@ -10,6 +12,7 @@ import com.gamesbykevin.bubblebobble2.maps.Maps;
 import com.gamesbykevin.bubblebobble2.menu.CustomMenu;
 import com.gamesbykevin.bubblebobble2.menu.CustomMenu.*;
 import com.gamesbykevin.bubblebobble2.resources.*;
+import com.gamesbykevin.bubblebobble2.shared.Shared;
 
 import java.awt.Graphics;
 import java.awt.Rectangle;
@@ -28,6 +31,10 @@ public final class Manager implements IManager
     
     //the hero
     private Hero hero;
+    
+    private Enemies enemies;
+    
+    private Bonuses bonuses;
     
     /**
      * Constructor for Manager, this is the point where we load any menu option configurations
@@ -49,10 +56,12 @@ public final class Manager implements IManager
         maps = new Maps(engine.getResources().getGameImage(GameImages.Keys.Maps), getWindow());
         
         //create new hero
-        hero = new Hero(Hero.Type.Hero2);
+        hero = new Hero(Hero.Type.Hero1);
         hero.setImage(engine.getResources().getGameImage(GameImages.Keys.Heroes));
-        hero.setLocation(64, 32);
         
+        enemies = new Enemies(engine.getResources().getGameImage(GameImages.Keys.Enemies));
+        
+        bonuses = new Bonuses(engine.getResources().getGameImage(GameImages.Keys.Bonus));
         //check the number of lives set
         //switch (engine.getMenu().getOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.Lives))
     }
@@ -95,6 +104,18 @@ public final class Manager implements IManager
             maps = null;
         }
         
+        if (bonuses != null)
+        {
+            bonuses.dispose();
+            bonuses = null;
+        }
+        
+        if (enemies != null)
+        {
+            enemies.dispose();
+            enemies = null;
+        }
+        
         try
         {
             //recycle objects
@@ -118,6 +139,21 @@ public final class Manager implements IManager
         {
             //this is called to generate the maps
             maps.update(engine);
+            
+            //if the maps are now complete set the hero start location
+            if (maps.isComplete())
+            {
+                switch(hero.getType())
+                {
+                    case Hero1:
+                        hero.setDestination(maps.getMap().getStartWest());
+                        break;
+                        
+                    default:
+                        hero.setDestination(maps.getMap().getStartEast());
+                        break;
+                }
+            }
         }
         else
         {
@@ -126,6 +162,9 @@ public final class Manager implements IManager
             
             //update hero
             hero.update(engine);
+            
+            //update enemies
+            enemies.update(engine);
         }
     }
     
@@ -136,11 +175,14 @@ public final class Manager implements IManager
     @Override
     public void render(final Graphics graphics)
     {
+        //draw the map (progress will be drawn if maps aren't created yet)
         maps.render(graphics);
         
         if (maps.isComplete())
         {
+            bonuses.render(graphics);
             hero.render(graphics);
+            enemies.render(graphics);
         }
     }
 }
