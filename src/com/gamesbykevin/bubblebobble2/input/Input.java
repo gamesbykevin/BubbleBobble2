@@ -102,6 +102,7 @@ public final class Input
             {
                 character.setAttack(true);
                 character.addProjectile();
+                character.resetVelocityX();
             }
             
             //stop firing

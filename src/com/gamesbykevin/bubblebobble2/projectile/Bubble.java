@@ -70,13 +70,20 @@ public final class Bubble extends Projectile
     }
     
     @Override
-    protected void checkCharacterCollision(final Character character)
+    public void markDiscard()
     {
-        //can only interact when using middle animation
-        if (!isAnimation(Key.Middle))
-            return;
+        //set as last animation
+        super.setAnimation(Key.End);
         
-        //check character collision here
+        //mark animation as finished
+        super.getSpriteSheet().getSpriteSheetAnimation(Key.End).setFinished(true);
+    }
+    
+    @Override
+    public boolean canAttack()
+    {
+        //can only attack as growing
+        return isAnimation(Key.Begin);
     }
     
     @Override
@@ -91,19 +98,11 @@ public final class Bubble extends Projectile
             return;
         
         //make sure the character is in range
-        if (character.getX() < getX() - (getWidth() / 2))
+        if (character.getX() < getX() - (getWidth() / 2) || character.getX() > getX() + (getWidth() / 2))
             return;
         
         //make sure the character is in range
-        if (character.getX() > getX() + (getWidth() / 2))
-            return;
-        
-        //make sure the character is in range
-        if (character.getY() >= getY())
-            return;
-        
-        //make sure the character is in range
-        if (character.getY() <= getY() - getHeight())
+        if (character.getY() >= getY() || character.getY() <= getY() - getHeight())
             return;
         
         //set idle if not attacking
@@ -134,19 +133,13 @@ public final class Bubble extends Projectile
         {
             if (super.getVelocityX() > 0)
             {
-                if (map.hasHorizontalCollision(getX() + (getWidth() / 2),  getY()) || 
-                    map.hasHorizontalCollision(getX() + (getWidth() / 2),  getY() - (getHeight() / 2)))
-                {
+                if (map.hasHorizontalCollision(getX() + (getWidth() / 2),  getY()))
                     setupMiddleAnimation();
-                }
             }
             else
             {
-                if (map.hasHorizontalCollision(getX() - (getWidth() / 2), getY()) || 
-                    map.hasHorizontalCollision(getX() - (getWidth() / 2), getY() - (getHeight() / 2)))
-                {
+                if (map.hasHorizontalCollision(getX() - (getWidth() / 2), getY()))
                     setupMiddleAnimation();
-                }
             }
         }
         
@@ -179,7 +172,7 @@ public final class Bubble extends Projectile
             }
         }
         
-        //check for collision with any characters
-        //checkCharacterCollision();
+        if (canAttack())
+            engine.getManager().getEnemies().checkProjectileCollision(this);
     }
 }

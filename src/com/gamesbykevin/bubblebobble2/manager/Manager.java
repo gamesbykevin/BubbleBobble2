@@ -59,17 +59,36 @@ public final class Manager implements IManager
         hero = new Hero(Hero.Type.Hero1);
         hero.setImage(engine.getResources().getGameImage(GameImages.Keys.Heroes));
         
+        //create container object for the enemies
         enemies = new Enemies(engine.getResources().getGameImage(GameImages.Keys.Enemies));
         
+        //create container object for the bonuses
         bonuses = new Bonuses(engine.getResources().getGameImage(GameImages.Keys.Bonus));
+        
         //check the number of lives set
         //switch (engine.getMenu().getOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.Lives))
     }
+    
+    public Bonuses getBonuses()
+    {
+        return this.bonuses;
+    }
+    
+    public Enemies getEnemies()
+    {
+        return this.enemies;
+    }
+    
     
     @Override
     public void reset(final Engine engine) throws Exception
     {
         
+    }
+    
+    public Hero getHero()
+    {
+        return this.hero;
     }
     
     public Maps getMaps()
@@ -143,6 +162,9 @@ public final class Manager implements IManager
             //if the maps are now complete set the hero start location
             if (maps.isComplete())
             {
+                //spawn the enemies
+                enemies.spawn(maps.getMap(), engine.getRandom());
+                
                 switch(hero.getType())
                 {
                     case Hero1:
@@ -181,8 +203,8 @@ public final class Manager implements IManager
         if (maps.isComplete())
         {
             bonuses.render(graphics);
-            hero.render(graphics);
             enemies.render(graphics);
+            hero.render(graphics);
         }
     }
 }

@@ -16,12 +16,6 @@ public abstract class Projectile extends Entity implements Disposable
     }
     
     /**
-     * How does the projectile manage collision
-     * @param Character The character we are checking for collision
-     */
-    protected abstract void checkCharacterCollision(final Character character);
-    
-    /**
      * Check the collision with the map
      * @param map The current map played
      */
@@ -40,10 +34,21 @@ public abstract class Projectile extends Entity implements Disposable
     public abstract boolean canDiscard();
     
     /**
+     * Flag the projectile to be discarded
+     */
+    public abstract void markDiscard();
+    
+    /**
      * Can the projectile be stood on
      * @return true if the character can stand on the projectile, false otherwise
      */
     public abstract boolean canStand();
+    
+    /**
+     * Can the projectile cause damage
+     * @return true if the projectile can attack, false otherwise
+     */
+    public abstract boolean canAttack();
     
     /**
      * Each projectile will have its own separate logic

@@ -35,7 +35,8 @@ public final class Hero extends Character
     
     public Hero(final Type type)
     {
-        super(SPEED_WALK, SPEED_WALK);
+        super.setSpeedRun(SPEED_WALK);
+        super.setSpeedWalk(SPEED_WALK);
         
         //store type of hero
         this.type = type;
@@ -87,6 +88,12 @@ public final class Hero extends Character
         
         //flag we are starting
         super.setStart(true);
+    }
+    
+    @Override
+    protected boolean checkProjectileCollision(final Projectile projectile)
+    {
+        return false;
     }
     
     @Override

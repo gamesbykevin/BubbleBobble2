@@ -3,20 +3,25 @@ package com.gamesbykevin.bubblebobble2.enemies;
 import com.gamesbykevin.framework.resources.Disposable;
 
 import com.gamesbykevin.bubblebobble2.character.Character;
-import com.gamesbykevin.bubblebobble2.engine.Engine;
+import com.gamesbykevin.bubblebobble2.maps.Map;
+import com.gamesbykevin.bubblebobble2.projectile.Projectile;
+
 import com.gamesbykevin.framework.util.Timers;
 
-public final class Enemy extends Character implements Disposable
+public abstract class Enemy extends Character implements Disposable
 {
     //speed to move
     private static final double DEFAULT_SPEED_WALK = .25;
-    private static final double DEFAULT_SPEED_RUN = .75;
+    private static final double DEFAULT_SPEED_RUN = .5;
     
     //default time delay for animations
     private static final long DEFAULT_DELAY = Timers.toNanoSeconds(250L);
     
+    //time delay for death animation
+    private static final long DEATH_DELAY = Timers.toNanoSeconds(100L);
+    
     //time the enemy is captured
-    private static final long DEFAULT_DELAY_CAPTURED = Timers.toNanoSeconds(3250L);
+    private static final long DEFAULT_DELAY_CAPTURED = Timers.toNanoSeconds(5000L);
     
     //dimension size of enemy
     private static final int WIDTH = 18;
@@ -28,41 +33,35 @@ public final class Enemy extends Character implements Disposable
     //is the enemy captured
     private boolean capture = false;
     
-    //the different opponents
-    public enum Type
-    {
-        Opponent1(false, DEFAULT_SPEED_WALK, DEFAULT_SPEED_RUN), 
-        Opponent2(false, DEFAULT_SPEED_WALK, DEFAULT_SPEED_RUN), 
-        Opponent3(false, DEFAULT_SPEED_WALK, DEFAULT_SPEED_RUN), 
-        Opponent4(false, DEFAULT_SPEED_WALK, DEFAULT_SPEED_RUN), 
-        Opponent5(false, DEFAULT_SPEED_WALK, DEFAULT_SPEED_RUN), 
-        Opponent6(false, DEFAULT_SPEED_WALK, DEFAULT_SPEED_RUN), 
-        Opponent7(false, DEFAULT_SPEED_WALK, DEFAULT_SPEED_RUN), 
-        Opponent8(true,  DEFAULT_SPEED_WALK, DEFAULT_SPEED_RUN);
-        
-        //can this type shoot a projectile
-        private final boolean shootProjectile;
-        
-        private final double moveWalk, moveRun;
-        
-        private Type(final boolean shootProjectile, final double moveWalk, final double moveRun)
-        {
-            this.shootProjectile = shootProjectile;
-            
-            this.moveWalk = moveWalk;
-            this.moveRun = moveRun;
-        }
-        
-        private boolean canShootProjectile()
-        {
-            return this.shootProjectile;
-        }
-    }
-
     //the different animations
     public enum Animations
     {
         Idle, Moving, MovingAngry, Captured, CapturedAngry, Destroyed
+    }
+    
+    public enum Type
+    {
+        BubbleBuster, Incendo, Beluga, Stoner, Coiley, Hullaballoon, SuperSocket, WillyWhistle
+    }
+    
+    private final Type type;
+    
+    protected Enemy(final Type type)
+    {
+        //store enemy type
+        this.type = type;
+        
+        //set default speed(s)
+        super.setSpeedRun(DEFAULT_SPEED_RUN);
+        super.setSpeedWalk(DEFAULT_SPEED_WALK);
+        
+        //setup animations
+        setupAnimations();
+    }
+    
+    private Type getType()
+    {
+        return this.type;
     }
     
     protected void setAngry(final boolean angry)
@@ -85,68 +84,86 @@ public final class Enemy extends Character implements Disposable
         return this.capture;
     }
     
-    //the type of opponent
-    private final Type type;
-    
-    protected Enemy(final Type type)
+    /**
+     * Is enemy finally dead? So they can be removed
+     * @return true if isDead() and is no longer moving, false otherwise
+     */
+    protected boolean hasDeathFinished()
     {
-        super(type.moveWalk, type.moveRun);
-        
-        this.type = type;
-        
-        //setup animations
-        setupAnimations();
-    }
-    
-    protected Type getType()
-    {
-        return this.type;
+        return (isDead() && !hasVelocity());
     }
     
     @Override
     public void addProjectile()
     {
         //if can't shoot projectile don't continue
-        if (!type.canShootProjectile())
+        if (!canShootProjectile())
             return;
+        
+        
     }
     
     @Override
-    public void setupAnimations()
+    protected boolean checkProjectileCollision(final Projectile projectile)
+    {
+        //if this is true don't check for projectile collision
+        if (isCaptured() || isStarting())
+            return false;
+        
+        //make sure projectile is close enough to hit the enemy
+        if (getDistance(projectile) <= projectile.getWidth() / 2)
+        {
+            //reset captured timers
+            setAnimation(Animations.Captured, true);
+            setAnimation(Animations.CapturedAngry, true);
+
+            //mark as captured
+            setCapture(true);
+
+            //return true since there was collision
+            return true;
+        }
+        
+        //anything else return false
+        return false;
+    }
+    
+    @Override
+    protected void setupAnimations()
     {
         final int y;
         
         switch (getType())
         {
-            case Opponent1:
+            case BubbleBuster:
                 y = 0 * HEIGHT;
                 break;
                 
-            case Opponent2:
+            case Incendo:
                 y = 1 * HEIGHT;
                 break;
                 
-            case Opponent3:
+            case Beluga:
                 y = 2 * HEIGHT;
                 break;
                 
-            case Opponent4:
+            case Stoner:
                 y = 3 * HEIGHT;
                 break;
                 
-            case Opponent5:
+            case Coiley:
                 y = 4 * HEIGHT;
                 break;
                 
-            case Opponent6:
+            case Hullaballoon:
                 y = 5 * HEIGHT;
                 break;
                 
-            case Opponent7:
+            case SuperSocket:
                 y = 6 * HEIGHT;
                 break;
                 
-            case Opponent8:
+            case WillyWhistle:
                 y = 7 * HEIGHT;
                 break;
                 
@@ -155,11 +172,11 @@ public final class Enemy extends Character implements Disposable
                 break;
         }
         
-        super.addAnimation(Animations.Idle, 1, 0, y, WIDTH, HEIGHT, 0, false);
-        super.addAnimation(Animations.Moving, 2, 18, y, WIDTH, HEIGHT, DEFAULT_DELAY, true);
-        super.addAnimation(Animations.MovingAngry, 2, 54, y, WIDTH, HEIGHT, DEFAULT_DELAY, true);
-        super.addAnimation(Animations.Destroyed, 4, 90, y, WIDTH, HEIGHT, DEFAULT_DELAY, true);
-        super.addAnimation(Animations.Captured, 1, 162, y, WIDTH, HEIGHT, DEFAULT_DELAY_CAPTURED, false);
+        super.addAnimation(Animations.Idle,          1, 0, y,   WIDTH, HEIGHT, 0, false);
+        super.addAnimation(Animations.Moving,        2, 18, y,  WIDTH, HEIGHT, DEFAULT_DELAY, true);
+        super.addAnimation(Animations.MovingAngry,   2, 54, y,  WIDTH, HEIGHT, DEFAULT_DELAY, true);
+        super.addAnimation(Animations.Destroyed,     4, 90, y,  WIDTH, HEIGHT, DEATH_DELAY, true);
+        super.addAnimation(Animations.Captured,      1, 162, y, WIDTH, HEIGHT, DEFAULT_DELAY_CAPTURED, false);
         super.addAnimation(Animations.CapturedAngry, 1, 180, y, WIDTH, HEIGHT, DEFAULT_DELAY_CAPTURED, false);
         
         //set animation
@@ -175,43 +192,85 @@ public final class Enemy extends Character implements Disposable
         if (isStarting())
             setAnimation(Animations.Idle);
 
-        if (isAngry())
-        {
-            if (isWalking() || isJumping() || isFalling())
-                setAnimation(Animations.MovingAngry);
+        if (isWalking() || isJumping() || isFalling())
+            setAnimation(isAngry() ? Animations.MovingAngry : Animations.Moving);
             
-            if (isCaptured())
-                setAnimation(Animations.CapturedAngry);
-        }
-        else
-        {
-            if (isWalking() || isJumping() || isFalling())
-                setAnimation(Animations.Moving);
-            
-            if (isCaptured())
-                setAnimation(Animations.Captured);
-        }
+        if (isCaptured())
+            setAnimation(isAngry() ? Animations.CapturedAngry : Animations.Captured);
         
         if (isDead())
             setAnimation(Animations.Destroyed);
     }
     
-    @Override
-    public void update(final Engine engine)
+    protected void manageDeath(final Map map, final long time)
     {
-        super.update(engine);
+        //did we have east or west collision
+        boolean east = false, west = false;
         
-        //if we aren't starting
-        if (!isStarting())
+        if (hasVelocityX())
         {
-            if (!isDead())
+            if (getVelocityX() > 0)
             {
-                
+                //if moving east and has map collision
+                east = map.hasEastCollision(getX());
+            }
+            else
+            {
+                //if moving west and has map collision
+                west = map.hasWestCollision(getX());
+            }
+            
+            //if hit either side, move in opposite direction
+            if (east || west)
+                setVelocityX(-getVelocityX());
+        }
+        
+        if (hasVelocityY())
+        {
+            if (getVelocityY() < 0)
+            {
+                if (map.hasNorthCollision(getY()))
+                    setVelocityY(-getVelocityY());
+            }
+            else
+            {
+                //can't check for side collision if hit east or west sides
+                if (!east && !west)
+                {
+                    //hit the ground so stop moving
+                    if (map.hasSouthCollision(getX(), getY()))
+                        resetVelocity();
+                }
             }
         }
         
+        //update location and animation
+        update(time);
+        
         //set the correct animation
         correctAnimation();
+    }
+    
+    protected void manageCapture()
+    {
+        //stop moving
+        resetVelocityX();
+
+        //move upwards
+        setVelocityY(-getSpeedWalk());
+
+        //update location
+        super.update();
+
+        //check timer to determine when enemy is to be freed
+        if (isCaptured() && isAnimationFinished())
+        {
+            //no longer captured
+            setCapture(false);
+
+            //enemy should now be angry
+            setAngry(true);
+        }
     }
     
     @Override

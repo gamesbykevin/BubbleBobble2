@@ -22,7 +22,7 @@ public abstract class Character extends Entity implements Disposable, IElement
     private int limit = 1;
     
     //the speed at which to walk, run
-    private double speedWalk, speedRun;
+    private double speedWalk = 0, speedRun = 0;
     
     //no movement
     public static final double SPEED_NONE = 0;
@@ -42,14 +42,20 @@ public abstract class Character extends Entity implements Disposable, IElement
     //where to place the character
     private double destinationX, destinationY;
     
-    protected Character(final double speedWalk, final double speedRun)
+    protected Character()
     {
-        //set the speed
-        this.speedWalk = speedWalk;
-        this.speedRun  = speedRun;
-        
         //create container for projectiles
         this.projectiles = new ArrayList<>();
+    }
+    
+    protected void setSpeedWalk(final double speedWalk)
+    {
+        this.speedWalk = speedWalk;
+    }
+    
+    protected void setSpeedRun(final double speedRun)
+    {
+        this.speedRun = speedRun;
     }
     
     private List<Projectile> getProjectiles()
@@ -57,9 +63,23 @@ public abstract class Character extends Entity implements Disposable, IElement
         return this.projectiles;
     }
     
+    public void removeProjectiles()
+    {
+        getProjectiles().clear();
+    }
+    
     public void setProjectileLimit(final int limit)
     {
         this.limit = limit;
+    }
+    
+    /**
+     * Can this character shoot projectiles
+     * @return true if the projectile limit is greater than 0
+     */
+    protected boolean canShootProjectile()
+    {
+        return (getProjectileLimit() > 0);
     }
     
     private int getProjectileLimit()
@@ -74,8 +94,18 @@ public abstract class Character extends Entity implements Disposable, IElement
      */
     public void setDestination(final Point destination)
     {
-        this.destinationX = destination.x;
-        this.destinationY = destination.y;
+        setDestinationX(destination.x);
+        setDestinationY(destination.y);
+    }
+    
+    public void setDestinationX(final int destinationX)
+    {
+        this.destinationX = destinationX;
+    }
+    
+    public void setDestinationY(final int destinationY)
+    {
+        this.destinationY = destinationY;
     }
     
     protected double getDestinationX()
@@ -257,14 +287,16 @@ public abstract class Character extends Entity implements Disposable, IElement
             {
                 for (int i = 0; i < getProjectiles().size(); i++)
                 {
+                    Projectile projectile = getProjectiles().get(i);
+                    
                     //manage the collision of projectile with the parent that created it
-                    getProjectiles().get(i).checkParentCollision(this);
+                    projectile.checkParentCollision(this);
                     
                     //update projectile
-                    getProjectiles().get(i).update(engine);
+                    projectile.update(engine);
                     
                     //if we can discard the projectile
-                    if (getProjectiles().get(i).canDiscard())
+                    if (projectile.canDiscard())
                     {
                         getProjectiles().remove(i);
                         i--;
@@ -284,6 +316,13 @@ public abstract class Character extends Entity implements Disposable, IElement
         //set the correct animation
         correctAnimation();
     }
+    
+    /**
+     * How do we manage projectile collision
+     * @param projectile The projectile we are checking for collision
+     * @return true if collision occurred, false otherwise
+     */
+    protected abstract boolean checkProjectileCollision(final Projectile projectile);
     
     /**
      * Add projectile to list
@@ -380,12 +419,12 @@ public abstract class Character extends Entity implements Disposable, IElement
         {
             if (super.getVelocityX() > 0)
             {
-                if (map.hasHorizontalCollision(getX() + (getWidth() / 2), getY()))
+                if (map.hasHorizontalCollision(getX() + (getWidth() / 2), getY() + (getHeight() / 4)))
                     super.resetVelocityX();
             }
             else
             {
-                if (map.hasHorizontalCollision(getX() - (getWidth() / 2), getY()))
+                if (map.hasHorizontalCollision(getX() - (getWidth() / 2), getY() + (getHeight() / 4)))
                     super.resetVelocityX();
             }
         }
@@ -400,11 +439,14 @@ public abstract class Character extends Entity implements Disposable, IElement
         //we hit the ground if there is south collision and we are not jumping
         final boolean hitGround = map.hasSouthCollision(getX(), getY() + (getHeight() / 2)) && !isJumping();
         
+        //is the character at the top of the screen
+        final boolean atTop = (map.getRow(getY() + (getHeight() / 2)) <= Map.BOUNDARY_ROW_MIN);
+        
         //is the character stuck in a block
         final boolean stuck = map.hasSouthCollision(getX(), getY() + (getHeight() / 2)) && map.hasSouthCollision(getX(), getY());
         
-        //if we hit the ground and we are not stuck
-        if (hitGround && !stuck)
+        //if we hit the ground and we are not stuck and not at the top of the screen
+        if (hitGround && !stuck && !atTop)
         {
             //stop falling
             resetVelocityY();

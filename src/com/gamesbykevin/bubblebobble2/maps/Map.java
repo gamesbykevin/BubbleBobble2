@@ -1,19 +1,26 @@
 package com.gamesbykevin.bubblebobble2.maps;
 
+import com.gamesbykevin.bubblebobble2.enemies.Enemies;
 import com.gamesbykevin.framework.base.Cell;
 import com.gamesbykevin.framework.labyrinth.Location;
 import com.gamesbykevin.framework.resources.Disposable;
 
 import com.gamesbykevin.bubblebobble2.entity.Entity;
+import com.gamesbykevin.bubblebobble2.shared.Shared;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class Map extends Entity implements Disposable
 {
     //each map contains blocks 8 x 8 in size
     public static final int BLOCK_SIZE = 8;
+    
+    private static final int HERO_COLUMN_RANGE = 1;
+    private static final int ENEMY_COLUMN_RANGE = 2;
     
     //default size of each map
     protected static final int WIDTH = 256;
@@ -29,7 +36,7 @@ public final class Map extends Entity implements Disposable
     //each map has boundaries where gameplay takes place
     private static final int BOUNDARY_COL_MIN = 2;
     private static final int BOUNDARY_COL_MAX = COLUMNS - 3;
-    private static final int BOUNDARY_ROW_MIN = 1;
+    public  static final int BOUNDARY_ROW_MIN = 1;
     private static final int BOUNDARY_ROW_MAX = ROWS - 2;
     
     //some maps may have gaps in the floor
@@ -40,6 +47,9 @@ public final class Map extends Entity implements Disposable
     
     //the array of locations in this map
     private Location[][] locations;
+    
+    //locations where the enemies can be placed
+    private List<Cell> spawnLocations;
     
     //where the hero1 will start
     public static final int START_COL_HERO_1 = BOUNDARY_COL_MIN;
@@ -72,6 +82,9 @@ public final class Map extends Entity implements Disposable
         //create new array of locations
         this.locations = new Location[ROWS][COLUMNS];
         
+        //create new list for spawn locations
+        this.spawnLocations = new ArrayList<>();
+        
         //setup the boundaries based on pixel color
         for (int col = 0; col < COLUMNS; col++)
         {
@@ -79,6 +92,9 @@ public final class Map extends Entity implements Disposable
             {
                 //create new location
                 Location tmp = new Location(col, row);
+                
+                //remove all walls by default
+                tmp.getWalls().clear();
                 
                 //calculate the current pixel location
                 final int x = startX + getBlockX(col);
@@ -120,7 +136,7 @@ public final class Map extends Entity implements Disposable
                 for (int col = BOUNDARY_COL_MIN; col <= (COLUMNS / 2); col++)
                 {
                     //if all blocks aren't solid, this is a valid place
-                    if (!isSolid(col, row) && !isSolid(col + 1, row) && !isSolid(col, row + 1) && !isSolid(col + 1, row + 1))
+                    if (hasFreeSpace(col, row, HERO_COLUMN_RANGE))
                     {
                         startWest = new Point(BLOCK_SIZE * (col + 1), BLOCK_SIZE * (row + 1));
                         break;
@@ -134,7 +150,7 @@ public final class Map extends Entity implements Disposable
                 for (int col = BOUNDARY_COL_MAX - 1; col >= (COLUMNS / 2); col--)
                 {
                     //if all blocks aren't solid, this is a valid place
-                    if (!isSolid(col, row) && !isSolid(col + 1, row) && !isSolid(col, row + 1) && !isSolid(col + 1, row + 1))
+                    if (hasFreeSpace(col, row, HERO_COLUMN_RANGE))
                     {
                         startEast = new Point(BLOCK_SIZE * (col + 1), BLOCK_SIZE * (row + 1));
                         break;
@@ -147,8 +163,44 @@ public final class Map extends Entity implements Disposable
                 break;
         }
         
+        //now that hero locations are found, check for valid spawn locations for the enemies
+        for (int row = BOUNDARY_ROW_MIN; row < BOUNDARY_ROW_MAX - 2; row++)
+        {
+            for (int col = BOUNDARY_COL_MIN + 2; col < (COLUMNS / 2) - 1; col++)
+            {
+                //make sure both sides are free
+                if (hasFreeSpace(col, row, ENEMY_COLUMN_RANGE) && hasFreeSpace(COLUMNS - col, row, ENEMY_COLUMN_RANGE))
+                {
+                    //add valid location to the list
+                    this.spawnLocations.add(new Cell(col + 1, row + 1));
+                }
+            }
+        }
+        
         //setup animation
         setupAnimations();
+    }
+    
+    /**
+     * Is this space open for a character to be placed
+     * @param col Starting north-west column
+     * @param row Starting north-west row
+     * @param columnRange The columns to check on both sides of the current col
+     * @return true if the cells around the specified are not solid
+     */
+    public boolean hasFreeSpace(final int col, final int row, final int columnRange)
+    {
+        for (int x = -columnRange; x <= columnRange; x++)
+        {
+            for (int y = 0; y <= 1; y++)
+            {
+                //if any space is solid it is not a free space
+                if (isSolid(col + x, row + y))
+                    return false;
+            }
+        }
+        
+        return true;
     }
     
     /**
@@ -158,6 +210,11 @@ public final class Map extends Entity implements Disposable
     public Point getStartWest()
     {
         return this.startWest;
+    }
+    
+    public List<Cell> getSpawnLocations()
+    {
+        return this.spawnLocations;
     }
     
     /**
@@ -231,25 +288,18 @@ public final class Map extends Entity implements Disposable
     
     public boolean hasNorthCollision(final double x, final double y)
     {
-        final int col = getColumn(x);
-        final int row = getRow(y);
-        
         //north collision when close to top
-        if (row < BOUNDARY_ROW_MIN)
+        if (hasNorthCollision(x))
             return true;
         
         //return true if solid
-        return (isSolid(col, row));
+        return (isSolid(getColumn(x), getRow(y)));
     }
     
     public boolean hasSouthCollision(final double x, final double y)
     {
         final int col = getColumn(x);
         final int row = getRow(y);
-        
-        //no south collision when at top
-        if (row <= BOUNDARY_ROW_MIN)
-            return false;
         
         if (row > BOUNDARY_ROW_MAX)
         {
@@ -272,25 +322,62 @@ public final class Map extends Entity implements Disposable
     
     public boolean hasHorizontalCollision(final double x, final double y)
     {
-        final int col = getColumn(x);
-        final int row = getRow(y);
-        
         //the sides will always
-        if (col < BOUNDARY_COL_MIN || col > BOUNDARY_COL_MAX)
+        if (hasWestCollision(x) || hasEastCollision(x))
             return true;
         
-        if (row <= BOUNDARY_ROW_MIN)
+        if (hasNorthCollision(y))
             return false;
         
-        return isSolid(col, row);
+        return isSolid(getColumn(x), getRow(y));
     }
     
-    private int getRow(final double y)
+    /**
+     * Is the location on the boundary west side of the map
+     * @param x x-coordinate
+     * @return true if the column where the x-coordinate is, is less than the BOUNDARY_COL_MIN
+     */
+    public boolean hasWestCollision(final double x)
+    {
+        return (getColumn(x) < BOUNDARY_COL_MIN);
+    }
+    
+    /**
+     * Is the location on the boundary east side of the map
+     * @param x x-coordinate
+     * @return true if the column where the x-coordinate is, is greater than the BOUNDARY_COL_MAX
+     */
+    public boolean hasEastCollision(final double x)
+    {
+        return (getColumn(x) > BOUNDARY_COL_MAX);
+    }
+    
+    /**
+     * Is the location on the boundary east side of the map
+     * @param y y-coordinate
+     * @return true if the column where the y-coordinate is, is less than the BOUNDARY_ROW_MIN
+     */
+    public boolean hasNorthCollision(final double y)
+    {
+        return (getRow(y) < BOUNDARY_ROW_MIN);
+    }
+    
+    /**
+     * Get the row
+     * @param y y-coordinate
+     * @return the row where the specified y-coordinate is
+     */
+    public int getRow(final double y)
     {
         return (int)(y / BLOCK_SIZE);
     }
     
-    private int getColumn(final double x)
+    /**
+     * Get the column
+     * @param x x-coordinate
+     * @return the column where the specified x-coordinate is
+     */
+    public int getColumn(final double x)
     {
         return (int)(x / BLOCK_SIZE);
     }
