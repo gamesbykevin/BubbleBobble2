@@ -238,8 +238,15 @@ public abstract class Enemy extends Character implements Disposable
                 if (!east && !west)
                 {
                     //hit the ground so stop moving
-                    if (map.hasSouthCollision(getX(), getY()))
+                    if (map.hasSouthCollision(getX(), getY()) && map.getRow(getY()) > Map.BOUNDARY_ROW_MIN)
+                    {
                         resetVelocity();
+                    }
+                    else
+                    {
+                        //if object is moving south it should spawn at top if out of bounds
+                        checkLocation(map);
+                    }
                 }
             }
         }

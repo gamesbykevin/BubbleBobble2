@@ -25,6 +25,9 @@ public final class Maps implements Disposable, IElement
     //the current map
     private int index = 0;
     
+    //do we transition to the next level
+    private boolean transition = false;
+    
     //the coordinates where the first map is located
     private static final int START_X = 3;
     private static final int START_Y = 3;
@@ -35,6 +38,9 @@ public final class Maps implements Disposable, IElement
     //used to determine the coordinates of the maps
     private static final int MAPS_PER_COLUMN = 10;
     private static final int MAPS_PER_ROW = 10;
+    
+    //the speed at which the next level appears
+    private static final int MAP_TRANSITION_SPEED = -1;
     
     //track progress of maps being created
     private Progress progress;
@@ -52,12 +58,14 @@ public final class Maps implements Disposable, IElement
     protected static final int IMAGE_PIXELS_PER_COLUMN = 2593;
     protected static final int IMAGE_PIXELS_PER_ROW = 4488;
     
+    /**
+     * 
+     * @param image Image of all maps
+     * @param window Area where map will be displayed
+     * @param level 
+     */
     public Maps(final Image image, final Rectangle window)
     {
-        this.index = (int)(Math.random() * MAP_COUNT);
-        
-        System.out.println("Random Level: " + (index+1));
-        
         //our image that contains all maps
         this.image = image;
         
@@ -89,6 +97,34 @@ public final class Maps implements Disposable, IElement
         {
             e.printStackTrace();
         }
+    }
+    
+    /**
+     * Do we want to start moving to the next level
+     * @param transition true if yes, false otherwise
+     */
+    public void setTransition(final boolean transition)
+    {
+        this.transition = transition;
+        
+        //if transition start moving all maps
+        if (hasTransition())
+        {
+            for (int i = 0; i < maps.size(); i++)
+            {
+                getMap(i).setVelocityY(MAP_TRANSITION_SPEED);
+            }
+        }
+    }
+    
+    public boolean hasTransition()
+    {
+        return this.transition;
+    }
+    
+    public void setStartingMap(final int level)
+    {
+        this.index = level;
     }
     
     /**
@@ -165,10 +201,20 @@ public final class Maps implements Disposable, IElement
     }
     
     /**
-     * Get the map
+     * Get the current map
      * @return The current map
      */
     public Map getMap()
+    {
+        return getMap(index);
+    }
+    
+    /**
+     * Get the specified map
+     * @param index The location of the map we want
+     * @return Map
+     */
+    public Map getMap(final int index)
     {
         return maps.get(index);
     }
@@ -195,6 +241,28 @@ public final class Maps implements Disposable, IElement
                 if (progress.isComplete())
                     setMap();
             }
+            else
+            {
+                //if we are switching levels
+                if (hasTransition())
+                {
+                    //update location of all maps
+                    for (int i = 0; i < maps.size(); i++)
+                    {
+                        getMap(i).update();
+                    }
+                    
+                    //is the next map at the finish line?
+                    if (getMap(index + 1).getY() <= 0)
+                    {
+                        //stop the transition
+                        setTransition(false);
+                        
+                        //set the next level
+                        setStartingMap(index + 1);
+                    }
+                }
+            }
         }
         catch (Exception e)
         {
@@ -218,14 +286,22 @@ public final class Maps implements Disposable, IElement
         else
         {
             //draw map
-            if (!Shared.DEBUG)
+            /*
+            if (Shared.DEBUG)
             {
                 getMap().renderTest(graphics);
+
+                if (hasTransition())
+                    getMap(index + 1).renderTest(graphics);
             }
-            else
-            {
-                getMap().draw(graphics, image);
-            }
+            */
+            
+            //draw current map
+            getMap().draw(graphics, image);
+
+            //if moving to new map draw new map also
+            if (hasTransition())
+                getMap(index + 1).draw(graphics, image);
         }
     }
 }

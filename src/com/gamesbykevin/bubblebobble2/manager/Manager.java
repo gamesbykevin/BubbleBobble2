@@ -55,6 +55,12 @@ public final class Manager implements IManager
         //create new maps
         maps = new Maps(engine.getResources().getGameImage(GameImages.Keys.Maps), getWindow());
         
+        final int index = (int)(Math.random() * 200);
+        System.out.println("Random Level: " + (index+1));
+        
+        //set level start
+        maps.setStartingMap(index);
+        
         //create new hero
         hero = new Hero(Hero.Type.Hero1);
         hero.setImage(engine.getResources().getGameImage(GameImages.Keys.Heroes));
@@ -154,39 +160,87 @@ public final class Manager implements IManager
     @Override
     public void update(final Engine engine) throws Exception
     {
-        if (!maps.isComplete())
+        if (!getMaps().isComplete())
         {
             //this is called to generate the maps
-            maps.update(engine);
+            getMaps().update(engine);
             
             //if the maps are now complete set the hero start location
-            if (maps.isComplete())
+            if (getMaps().isComplete())
             {
                 //spawn the enemies
-                enemies.spawn(maps.getMap(), engine.getRandom());
+                getEnemies().spawn(getMaps().getMap(), engine.getRandom());
                 
-                switch(hero.getType())
+                switch(getHero().getType())
                 {
                     case Hero1:
-                        hero.setDestination(maps.getMap().getStartWest());
+                        getHero().setDestination(getMaps().getMap().getStartWest());
                         break;
                         
                     default:
-                        hero.setDestination(maps.getMap().getStartEast());
+                        getHero().setDestination(getMaps().getMap().getStartEast());
                         break;
                 }
             }
         }
         else
         {
-            //update character
-            Input.update(hero, engine.getKeyboard());
-            
-            //update hero
-            hero.update(engine);
-            
-            //update enemies
-            enemies.update(engine);
+            //if there are no enemies or bonuses the level is complete
+            if (!getEnemies().hasEnemies() && !getBonuses().hasBonuses() && !getMaps().hasTransition())
+            {
+                //start transition
+                getMaps().setTransition(true);
+                
+                //remove all projectiles
+                getHero().removeProjectiles();
+                
+                //set starting
+                getHero().setStart(true);
+                
+                //update hero
+                getHero().update(engine);
+            }
+            else
+            {
+                if (getMaps().hasTransition())
+                {
+                    //update the maps
+                    getMaps().update(engine);
+                    
+                    //if transition has finished
+                    if (!getMaps().hasTransition())
+                    {
+                        //update hero
+                        getHero().update(engine);
+
+                        //set starting
+                        getHero().setStart(true);
+                        
+                        //set the new destination
+                        getHero().setDestination(getMaps().getMap().getStartWest());
+                        
+                        //spawn the enemies
+                        getEnemies().spawn(getMaps().getMap(), engine.getRandom());
+                    }
+                }
+                else
+                {
+                    //update character
+                    Input.update(getHero(), engine.getKeyboard());
+
+                    //update hero
+                    getHero().update(engine);
+
+                    //update enemies
+                    getEnemies().update(engine);
+
+                    //update bonuses
+                    getBonuses().update(engine);
+
+                    //update the maps
+                    getMaps().update(engine);
+                }
+            }
         }
     }
     
@@ -198,13 +252,13 @@ public final class Manager implements IManager
     public void render(final Graphics graphics)
     {
         //draw the map (progress will be drawn if maps aren't created yet)
-        maps.render(graphics);
+        getMaps().render(graphics);
         
-        if (maps.isComplete())
+        if (getMaps().isComplete())
         {
-            bonuses.render(graphics);
-            enemies.render(graphics);
-            hero.render(graphics);
+            getBonuses().render(graphics);
+            getEnemies().render(graphics);
+            getHero().render(graphics);
         }
     }
 }

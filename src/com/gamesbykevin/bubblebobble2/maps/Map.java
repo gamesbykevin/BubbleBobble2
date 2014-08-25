@@ -34,10 +34,10 @@ public final class Map extends Entity implements Disposable
     private static final int MINIMUM_BLOCK_REQUIREMENT = (ROWS * 4) + ((COLUMNS - 12) * 2);
     
     //each map has boundaries where gameplay takes place
-    private static final int BOUNDARY_COL_MIN = 2;
-    private static final int BOUNDARY_COL_MAX = COLUMNS - 3;
-    public  static final int BOUNDARY_ROW_MIN = 1;
-    private static final int BOUNDARY_ROW_MAX = ROWS - 2;
+    public static final int BOUNDARY_COL_MIN = 2;
+    public static final int BOUNDARY_COL_MAX = COLUMNS - 3;
+    public static final int BOUNDARY_ROW_MIN = 1;
+    public static final int BOUNDARY_ROW_MAX = ROWS - 2;
     
     //some maps may have gaps in the floor
     private static final int FLOOR_GAP_START_COL_1 = 9;
@@ -289,7 +289,7 @@ public final class Map extends Entity implements Disposable
     public boolean hasNorthCollision(final double x, final double y)
     {
         //north collision when close to top
-        if (hasNorthCollision(x))
+        if (hasNorthCollision(y))
             return true;
         
         //return true if solid
@@ -353,7 +353,7 @@ public final class Map extends Entity implements Disposable
     }
     
     /**
-     * Is the location on the boundary east side of the map
+     * Is the location on the boundary north side of the map
      * @param y y-coordinate
      * @return true if the column where the y-coordinate is, is less than the BOUNDARY_ROW_MIN
      */
@@ -460,8 +460,8 @@ public final class Map extends Entity implements Disposable
                 if (!isSolid(col, row))
                     continue;
 
-                final int x = getBlockX(tmp.getCol());
-                final int y = getBlockY(tmp.getRow());
+                final int x = (int)(getBlockX(tmp.getCol()) + getX());
+                final int y = (int)(getBlockY(tmp.getRow()) + getY());
             
                 graphics.setColor(Color.WHITE);
                 graphics.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);

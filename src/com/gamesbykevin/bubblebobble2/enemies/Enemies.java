@@ -25,7 +25,8 @@ public final class Enemies implements Disposable, IElement
     //the number of enemies to spawn at once
     public static final int SPAWN_LIMIT = 4;
     
-    private static final int DEAD_MULTIPLIER = 3;
+    //the rate to apply to dead move speed
+    public static final int DEAD_MULTIPLIER = 3;
     
     public Enemies(final Image image)
     {
@@ -57,7 +58,7 @@ public final class Enemies implements Disposable, IElement
             
             //don't bother checking if dead or haven't started
             if (enemy.isDead() || enemy.isStarting())
-                return;
+                continue;
             
             //check if the enemy has collided with the character
             if (enemy.getDistance(character) <= enemy.getWidth() / 2)
@@ -70,8 +71,16 @@ public final class Enemies implements Disposable, IElement
                     //move enemy same direction as the character
                     enemy.setVelocityX(character.getVelocityX() > 0 ? enemy.getSpeedRun() * DEAD_MULTIPLIER : -enemy.getSpeedRun() * DEAD_MULTIPLIER);
                     
-                    //enemy always flies in the air
-                    enemy.setVelocityY(-enemy.getSpeedRun());
+                    if (enemy.getVelocityX() > 0)
+                    {
+                        //enemy always flies in the air
+                        enemy.setVelocityY(-enemy.getVelocityX());
+                    }
+                    else
+                    {
+                        //enemy always flies in the air
+                        enemy.setVelocityY(enemy.getVelocityX());
+                    }
                     
                     //remove projectiles
                     enemy.removeProjectiles();
@@ -223,7 +232,12 @@ public final class Enemies implements Disposable, IElement
         }
     }
     
-    public int getCount()
+    public boolean hasEnemies()
+    {
+        return (!enemies.isEmpty());
+    }
+    
+    private int getCount()
     {
         return enemies.size();
     }
@@ -265,14 +279,20 @@ public final class Enemies implements Disposable, IElement
             {
                 Enemy enemy = getEnemy(i);
                 
+                //update enemy
                 enemy.update(engine);
                 
+                //if death is finished enemy can be removed
                 if (enemy.hasDeathFinished())
                 {
                     //remove enemy
                     remove(enemy);
                     
-                    //add fruit here
+                    //add fruit
+                    engine.getManager().getBonuses().add(enemy);
+                    
+                    //move index back
+                    i--;
                 }
             }
         }

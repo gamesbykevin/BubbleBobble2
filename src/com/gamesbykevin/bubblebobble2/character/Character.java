@@ -4,6 +4,7 @@ import com.gamesbykevin.framework.resources.Disposable;
 
 import com.gamesbykevin.bubblebobble2.engine.Engine;
 import com.gamesbykevin.bubblebobble2.entity.Entity;
+import com.gamesbykevin.bubblebobble2.input.Input;
 import com.gamesbykevin.bubblebobble2.maps.Map;
 import com.gamesbykevin.bubblebobble2.projectile.Projectile;
 import com.gamesbykevin.bubblebobble2.shared.IElement;
@@ -394,7 +395,7 @@ public abstract class Character extends Entity implements Disposable, IElement
         }
     }
     
-    private void checkLocation(final Map map)
+    protected void checkLocation(final Map map)
     {
         if (hasVelocityY())
         {
