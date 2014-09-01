@@ -1,12 +1,10 @@
 package com.gamesbykevin.bubblebobble2.maps;
 
-import com.gamesbykevin.bubblebobble2.enemies.Enemies;
 import com.gamesbykevin.framework.base.Cell;
 import com.gamesbykevin.framework.labyrinth.Location;
 import com.gamesbykevin.framework.resources.Disposable;
 
 import com.gamesbykevin.bubblebobble2.entity.Entity;
-import com.gamesbykevin.bubblebobble2.shared.Shared;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -23,8 +21,8 @@ public final class Map extends Entity implements Disposable
     private static final int ENEMY_COLUMN_RANGE = 2;
     
     //default size of each map
-    protected static final int WIDTH = 256;
-    protected static final int HEIGHT = 192;
+    public static final int WIDTH = 256;
+    public static final int HEIGHT = 192;
     
     //the dimension size of 8 x 8 blocks in each map
     public static final int COLUMNS = 32;
@@ -253,6 +251,16 @@ public final class Map extends Entity implements Disposable
         
         //return the count
         return count;
+    }
+    
+    /**
+     * Determine if the location is in bounds.
+     * @param entity Entity we want to check
+     * @return true if the location is in the playable area, false otherwise
+     */
+    public boolean hasBounds(final Entity entity)
+    {
+        return hasBounds(entity.getX(), entity.getY());
     }
     
     /**

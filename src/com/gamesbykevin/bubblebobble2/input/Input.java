@@ -28,7 +28,7 @@ public final class Input
     public static void update(final Character character, final Keyboard keyboard)
     {
         //if the character is starting don't check input yet
-        if (character.isStarting())
+        if (character.isStarting() || character.isDead())
             return;
         
         //can only press left or right

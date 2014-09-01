@@ -2,10 +2,6 @@ package com.gamesbykevin.bubblebobble2.resources;
 
 import com.gamesbykevin.framework.resources.FontManager;
 
-/**
- *
- * @author GOD
- */
 public final class GameFont extends FontManager
 {
     //description for progress bar

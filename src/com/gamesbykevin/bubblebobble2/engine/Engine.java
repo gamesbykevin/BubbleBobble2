@@ -15,7 +15,7 @@ import java.util.Random;
 public final class Engine implements KeyListener, MouseMotionListener, MouseListener, IEngine 
 {
     //our Main class has important information in it so we need a reference here
-    private Main main;
+    private final Main main;
     
     //access this menu here
     private CustomMenu menu;
@@ -117,7 +117,7 @@ public final class Engine implements KeyListener, MouseMotionListener, MouseList
     {
         try
         {
-            if (this.menu == null)
+            if (menu == null)
             {
                 //create new menu
                 menu = new CustomMenu(this);
@@ -231,7 +231,7 @@ public final class Engine implements KeyListener, MouseMotionListener, MouseList
     {
         //get default font
         if (font == null)
-            font = graphics.getFont();
+            font = graphics.getFont().deriveFont(10f);
         
         if (menu != null)
         {

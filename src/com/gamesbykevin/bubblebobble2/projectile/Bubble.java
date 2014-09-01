@@ -35,11 +35,10 @@ public final class Bubble extends Projectile
     
     public Bubble(final boolean east)
     {
+        super();
+        
         //set the speed
         super.setVelocityX(east ? VELOCITY_X : -VELOCITY_X);
-        
-        //setup animations
-        setupAnimations();
     }
     
     @Override
@@ -52,9 +51,6 @@ public final class Bubble extends Projectile
         
         //set the current animation
         super.setAnimation(Key.Begin);
-        
-        //set the dimension
-        super.setDimensions();
     }
     
     @Override

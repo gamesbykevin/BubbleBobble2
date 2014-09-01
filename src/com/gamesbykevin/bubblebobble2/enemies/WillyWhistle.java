@@ -24,7 +24,7 @@ public final class WillyWhistle extends Enemy
                 //if captured, prevent horizontal movement
                 if (isCaptured())
                 {
-                    super.manageCapture();
+                    manageCapture(engine.getManager().getMaps().getMap());
                 }
                 else
                 {
@@ -32,6 +32,8 @@ public final class WillyWhistle extends Enemy
                     {
                         if (!hasVelocityX())
                         {
+                            setWalk(true);
+                            
                             if (engine.getRandom().nextBoolean())
                             {
                                 setVelocityX(isAngry()? getSpeedRun() : getSpeedWalk());
@@ -64,5 +66,20 @@ public final class WillyWhistle extends Enemy
         
         //set the correct animation
         correctAnimation();
+    }
+    
+    @Override
+    public void addProjectile()
+    {
+        //if can't shoot projectile don't continue
+        if (!canShootProjectile() || !canAttack())
+            return;
+        
+        //if enough time hasn't passed till next projectile
+        if (!getTimer().hasTimePassed())
+            return;
+        
+        //reset timer
+        getTimer().reset();
     }
 }

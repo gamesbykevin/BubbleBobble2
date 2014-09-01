@@ -4,6 +4,7 @@ import com.gamesbykevin.framework.resources.Disposable;
 
 import com.gamesbykevin.bubblebobble2.character.Character;
 import com.gamesbykevin.bubblebobble2.engine.Engine;
+import com.gamesbykevin.bubblebobble2.hero.Hero;
 import com.gamesbykevin.bubblebobble2.maps.Map;
 import com.gamesbykevin.bubblebobble2.projectile.Projectile;
 import com.gamesbykevin.bubblebobble2.shared.IElement;
@@ -48,7 +49,7 @@ public final class Enemies implements Disposable, IElement
      */
     private void checkCharacterCollision(final Character character)
     {
-        //don't bother checking if dead or haven't started
+        //don't bother checking if dead or haven't started, or invincible
         if (character.isDead() || character.isStarting())
             return;
         
@@ -61,7 +62,7 @@ public final class Enemies implements Disposable, IElement
                 continue;
             
             //check if the enemy has collided with the character
-            if (enemy.getDistance(character) <= enemy.getWidth() / 2)
+            if (enemy.getDistance(character) <= enemy.getWidth() * Character.COLLISION_RATIO)
             {
                 if (enemy.isCaptured())
                 {
@@ -84,15 +85,22 @@ public final class Enemies implements Disposable, IElement
                     
                     //remove projectiles
                     enemy.removeProjectiles();
-                    
-                    //character hurt the enemy
-                    System.out.println("Enemy hurt");
                 }
                 else
                 {
-                    //enemy hurt the character
-                    System.out.println("Character hurt");
+                    //only can die if not invincible
+                    if (!character.isInvincible())
+                    {
+                        //mark dead
+                        character.setDead(true);
+                        
+                        //stop moving
+                        character.resetVelocity();
+                    }
                 }
+                
+                //no need to continue
+                return;
             }
         }
     }
@@ -273,8 +281,14 @@ public final class Enemies implements Disposable, IElement
     @Override
     public void update(final Engine engine)
     {
+        Hero hero = engine.getManager().getHero();
+        
         if (enemies != null)
         {
+            //don't continue if here is starting
+            if (hero.isStarting())
+                return;
+                    
             for (int i = 0; i < enemies.size(); i++)
             {
                 Enemy enemy = getEnemy(i);
@@ -298,7 +312,7 @@ public final class Enemies implements Disposable, IElement
         }
         
         //check if the enemies hit the hero(es)
-        checkCharacterCollision(engine.getManager().getHero());
+        checkCharacterCollision(hero);
     }
     
     @Override

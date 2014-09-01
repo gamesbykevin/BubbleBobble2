@@ -1,6 +1,7 @@
 package com.gamesbykevin.bubblebobble2.enemies;
 
 import com.gamesbykevin.framework.resources.Disposable;
+import com.gamesbykevin.framework.util.Timer;
 
 import com.gamesbykevin.bubblebobble2.character.Character;
 import com.gamesbykevin.bubblebobble2.maps.Map;
@@ -11,8 +12,8 @@ import com.gamesbykevin.framework.util.Timers;
 public abstract class Enemy extends Character implements Disposable
 {
     //speed to move
-    private static final double DEFAULT_SPEED_WALK = .25;
-    private static final double DEFAULT_SPEED_RUN = .5;
+    public static final double DEFAULT_SPEED_WALK = .25;
+    public static final double DEFAULT_SPEED_RUN = .5;
     
     //default time delay for animations
     private static final long DEFAULT_DELAY = Timers.toNanoSeconds(250L);
@@ -33,6 +34,12 @@ public abstract class Enemy extends Character implements Disposable
     //is the enemy captured
     private boolean capture = false;
     
+    //timer to track rate of firing projectiles
+    private Timer timer;
+    
+    //default time
+    private static final long DEFAULT_SHOOT_DELAY = Timers.toNanoSeconds(1250L);
+    
     //the different animations
     public enum Animations
     {
@@ -51,12 +58,26 @@ public abstract class Enemy extends Character implements Disposable
         //store enemy type
         this.type = type;
         
+        //create new timer
+        this.timer = new Timer();
+        this.timer.setReset(DEFAULT_SHOOT_DELAY);
+        this.timer.reset();
+        
         //set default speed(s)
         super.setSpeedRun(DEFAULT_SPEED_RUN);
         super.setSpeedWalk(DEFAULT_SPEED_WALK);
         
         //setup animations
         setupAnimations();
+    }
+    
+    /**
+     * Get the timer used to determine rate of fire for projectiles
+     * @return Object containing time remaining
+     */
+    protected Timer getTimer()
+    {
+        return this.timer;
     }
     
     private Type getType()
@@ -94,14 +115,7 @@ public abstract class Enemy extends Character implements Disposable
     }
     
     @Override
-    public void addProjectile()
-    {
-        //if can't shoot projectile don't continue
-        if (!canShootProjectile())
-            return;
-        
-        
-    }
+    public abstract void addProjectile();
     
     @Override
     protected boolean checkProjectileCollision(final Projectile projectile)
@@ -234,19 +248,15 @@ public abstract class Enemy extends Character implements Disposable
             }
             else
             {
-                //can't check for side collision if hit east or west sides
-                if (!east && !west)
+                //hit the ground so stop moving
+                if (map.hasSouthCollision(getX(), getY()) && map.getRow(getY()) > Map.BOUNDARY_ROW_MIN)
                 {
-                    //hit the ground so stop moving
-                    if (map.hasSouthCollision(getX(), getY()) && map.getRow(getY()) > Map.BOUNDARY_ROW_MIN)
-                    {
-                        resetVelocity();
-                    }
-                    else
-                    {
-                        //if object is moving south it should spawn at top if out of bounds
-                        checkLocation(map);
-                    }
+                    resetVelocity();
+                }
+                else
+                {
+                    //if object is moving south it should spawn at top if out of bounds
+                    checkLocation(map);
                 }
             }
         }
@@ -258,19 +268,31 @@ public abstract class Enemy extends Character implements Disposable
         correctAnimation();
     }
     
-    protected void manageCapture()
+    /**
+     * Check if the captured phase is 
+     * @param map The current map played
+     */
+    protected void manageCapture(final Map map)
     {
+        //don't continue if not captured
+        if (!isCaptured())
+            return;
+        
         //stop moving
         resetVelocityX();
 
         //move upwards
         setVelocityY(-getSpeedWalk());
 
+        //if at top of map stop moving
+        if (map.hasNorthCollision(getY()))
+            resetVelocity();
+        
         //update location
         super.update();
 
-        //check timer to determine when enemy is to be freed
-        if (isCaptured() && isAnimationFinished())
+        //check timer to determine when enemy is to escape
+        if (isAnimationFinished())
         {
             //no longer captured
             setCapture(false);

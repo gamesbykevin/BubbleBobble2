@@ -3,7 +3,17 @@ package com.gamesbykevin.bubblebobble2.hero;
 import com.gamesbykevin.framework.util.Timers;
 
 import com.gamesbykevin.bubblebobble2.character.Character;
+import com.gamesbykevin.bubblebobble2.engine.Engine;
+import com.gamesbykevin.bubblebobble2.maps.Map;
 import com.gamesbykevin.bubblebobble2.projectile.*;
+import java.awt.AlphaComposite;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
 
 public final class Hero extends Character
 {
@@ -14,6 +24,15 @@ public final class Hero extends Character
     
     //the type of hero
     private Type type;
+    
+    //the default amount of starting lives
+    private static final int DEFAULT_LIVES = 5;
+    
+    //the amount of lives the hero has
+    private int lives = DEFAULT_LIVES;
+    
+    //where to render lives remaining
+    private Point renderLocation;
     
     public enum Animations
     {
@@ -30,8 +49,12 @@ public final class Hero extends Character
     private static final long DELAY_JUMP = Timers.toNanoSeconds(250L);
     private static final long DELAY_FALL = Timers.toNanoSeconds(250L);
     private static final long DELAY_ATTACK = Timers.toNanoSeconds(333L);
-    private static final long DELAY_DIE = Timers.toNanoSeconds(333L);
+    private static final long DELAY_DIE = Timers.toNanoSeconds(175L);
     private static final long DELAY_START = Timers.toNanoSeconds(500L);
+    
+    //our transparent image and original
+    private BufferedImage transparentImage;
+    private Image original;
     
     public Hero(final Type type)
     {
@@ -48,9 +71,105 @@ public final class Hero extends Character
         setupAnimations();
     }
     
+    @Override
+    public void setImage(final Image image)
+    {
+        super.setImage(image);
+        
+        //store original image
+        this.original = image;
+        
+        //create new image
+        this.transparentImage = new BufferedImage(getImage().getWidth(null), getImage().getHeight(null), BufferedImage.TYPE_INT_ARGB);
+
+        //get the graphics object to write
+        Graphics2D g2d = this.transparentImage.createGraphics();
+
+        //set transparency for this image
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+
+        //write original spritesheet to this image
+        g2d.drawImage(getImage(), 0, 0, null);
+    }
+    
     public Type getType()
     {
         return this.type;
+    }
+    
+    public void setLives(final int lives)
+    {
+        this.lives = lives;
+    }
+    
+    public int getLives()
+    {
+        return this.lives;
+    }
+    
+    public boolean hasLives()
+    {
+        return (getLives() > 0);
+    }
+    
+    @Override
+    public void update(final Engine engine)
+    {
+        if (!isDead())
+        {
+            //update basics 
+            super.update(engine);
+            
+            if (isInvincible())
+            {
+                //if time has passed, no longer invincible
+                if (getTimer().hasTimePassed())
+                {
+                    setInvincible(false);
+                }
+                
+                //update invincible timer
+                getTimer().update(engine.getMain().getTime());
+            }
+        }
+        else
+        {
+            //update location and animation
+            update(engine.getMain().getTime());
+
+            //set the correct animation
+            correctAnimation();
+            
+            //stop moving if dead
+            resetVelocity();
+            
+            //make sure death animation is finished
+            if (isAnimationFinished())
+            {
+                //deduct a life
+                setLives(getLives() - 1);
+                
+                //reset death animation
+                getSpriteSheet().reset();
+                
+                if (hasLives())
+                {
+                    //start invincibility
+                    setInvincible(true);
+                    
+                    //mark walking
+                    setWalk(true);
+                    
+                    //reset location
+                    setLocation(getDestinationX(), getDestinationY());
+                }
+                else
+                {
+                    //flag game over since no more lives
+                    engine.getManager().setResult(false);
+                }
+            }
+        }
     }
     
     @Override
@@ -150,5 +269,24 @@ public final class Hero extends Character
                 setIdle(true);
             }
         }
+    }
+    
+    @Override
+    public void render(final Graphics graphics)
+    {
+        //set image depending on invincible
+        super.setImage(isInvincible() ? transparentImage : original);
+        
+        //draw character
+        super.render(graphics);
+        
+        //draw amount of lives
+        if (renderLocation == null)
+            renderLocation = new Point(Map.BLOCK_SIZE, Map.BLOCK_SIZE);
+        
+        graphics.setColor(Color.BLACK);
+        graphics.fillRect(renderLocation.x, renderLocation.y - Map.BLOCK_SIZE, Map.BLOCK_SIZE * 2, Map.BLOCK_SIZE);
+        graphics.setColor(Color.WHITE);
+        graphics.drawString((getLives() < 0) ? "" + 0 : getLives() + "", renderLocation.x + 1, renderLocation.y);
     }
 }

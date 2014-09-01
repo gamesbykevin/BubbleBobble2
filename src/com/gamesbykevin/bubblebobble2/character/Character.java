@@ -1,13 +1,14 @@
 package com.gamesbykevin.bubblebobble2.character;
 
 import com.gamesbykevin.framework.resources.Disposable;
+import com.gamesbykevin.framework.util.Timer;
 
 import com.gamesbykevin.bubblebobble2.engine.Engine;
 import com.gamesbykevin.bubblebobble2.entity.Entity;
-import com.gamesbykevin.bubblebobble2.input.Input;
 import com.gamesbykevin.bubblebobble2.maps.Map;
 import com.gamesbykevin.bubblebobble2.projectile.Projectile;
 import com.gamesbykevin.bubblebobble2.shared.IElement;
+import com.gamesbykevin.framework.util.Timers;
 
 import java.awt.Graphics;
 import java.awt.Point;
@@ -29,7 +30,7 @@ public abstract class Character extends Entity implements Disposable, IElement
     public static final double SPEED_NONE = 0;
     
     //track what we are doing for the character
-    private boolean idle = false, walk = false, jump = false, fall = false, attack = false, dead = false, start = true;
+    private boolean idle = false, walk = false, jump = false, fall = false, attack = false, dead = false, start = true, invincible = false;
     
     //the max speed a character can fall
     private static final double MAX_SPEED_FALL = 1;
@@ -43,10 +44,46 @@ public abstract class Character extends Entity implements Disposable, IElement
     //where to place the character
     private double destinationX, destinationY;
     
+    //timer to track time to be invincible
+    private Timer timer;
+    
+    //default time to be invincibe
+    private static final long INVINCIBLE_DELAY = Timers.toNanoSeconds(5500L);
+    
+    //the distance to check for collision based on enemy width
+    public static final double COLLISION_RATIO = .75;
+    
     protected Character()
     {
         //create container for projectiles
         this.projectiles = new ArrayList<>();
+        
+        //create a new timer
+        this.timer = new Timer(INVINCIBLE_DELAY);
+    }
+    
+    protected void setInvincible(final boolean invincible)
+    {
+        if (invincible)
+        {
+            //reset dead state
+            setDead(false);
+            
+            //reset timer
+            getTimer().reset();
+        }
+        
+        this.invincible = invincible;
+    }
+    
+    public boolean isInvincible()
+    {
+        return this.invincible;
+    }
+    
+    protected Timer getTimer()
+    {
+        return this.timer;
     }
     
     protected void setSpeedWalk(final double speedWalk)
@@ -255,6 +292,17 @@ public abstract class Character extends Entity implements Disposable, IElement
     public void dispose()
     {
         super.dispose();
+        
+        for (int i = 0; i < projectiles.size(); i++)
+        {
+            projectiles.get(i).dispose();
+            projectiles.set(i, null);
+        }
+        
+        projectiles.clear();
+        projectiles = null;
+        
+        timer = null;
     }
     
     /**
@@ -414,7 +462,7 @@ public abstract class Character extends Entity implements Disposable, IElement
         }
     }
     
-    private void checkHorizontalCollision(final Map map)
+    protected void checkHorizontalCollision(final Map map)
     {
         if (super.hasVelocityX())
         {

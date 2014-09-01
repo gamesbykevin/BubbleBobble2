@@ -16,7 +16,7 @@ public final class GameImages extends ImageManager
      */
     public enum Keys
     {
-        Maps, Heroes, Enemies, Bonus
+        Maps, Heroes, Enemies, Bonus, GameOver, Victory
     }
     
     public GameImages() throws Exception

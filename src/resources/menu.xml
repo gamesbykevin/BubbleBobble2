@@ -9,21 +9,21 @@
     
     <!-- MENU COFIGURATION SETUP BELOW -->
     <layer id="Initial" next="Credits">
-        <transition></transition>
+        <transition>NONE</transition>
         <force>true</force>
         <pause>false</pause>
-        <duration>3250</duration>
-        <image>resources/images/menu/title.gif</image>
+        <duration>3000</duration>
+        <image>resources/images/menu/Title.jpg</image>
     </layer>
     <layer id="Credits" next="MainTitle">
         <transition>SCROLL_VERTICAL_NORTH</transition>
         <force>true</force>
         <pause>false</pause>
-        <duration>3250</duration>
+        <duration>3000</duration>
         <image>resources/images/menu/credit.gif</image>
     </layer>
     <layer id="MainTitle">
-        <transition>SCROLL_HORIZONTAL_WEST_REPEAT</transition>
+        <transition>NONE</transition>
         <force>false</force>
         <pause>true</pause>
         <duration>15000</duration>
@@ -40,7 +40,7 @@
         <options name="Credits" next="Credits" id="Credits"></options>
     </layer>
     <layer id="Options">
-        <transition>SCROLL_HORIZONTAL_WEST_REPEAT</transition>
+        <transition>NONE</transition>
         <force>false</force>
         <pause>true</pause>
         <duration>10000</duration>
@@ -50,11 +50,25 @@
         <title>Options</title>
         <backgroundMusicLocation></backgroundMusicLocation>
         <optionSoundLocation>resources/audio/menu/sound/selection.wav</optionSoundLocation>
+        <options name="Starting Level: " id="Level">
+            <option>1</option>
+            <option>20</option>
+            <option>40</option>
+            <option>60</option>
+            <option>80</option>
+            <option>100</option>
+            <option>120</option>
+            <option>140</option>
+            <option>160</option>
+            <option>180</option>
+            <option>200</option>
+        </options>
         <options name="Starting Lives: " id="Lives">
             <option>5</option>
             <option>10</option>
-            <option>33</option>
+            <option>25</option>
             <option>99</option>
+            <option>1</option>
         </options>
         <options name="Full Screen: " id="FullScreen">
             <option>Off</option>
@@ -62,25 +76,39 @@
         </options>
         <options name="Go Back" next="MainTitle" id="MainTitle"></options>
     </layer>
-    <layer id="Controls" next="Controls2">
-        <transition></transition>
+    <layer id="Controls" next="MainTitle">
+        <transition>NONE</transition>
         <force>false</force>
         <pause>true</pause>
         <duration></duration>
-        <image>resources/images/menu/controls1.gif</image>
+        <image>resources/images/menu/Controls.jpg</image>
     </layer>
-    <layer id="Instructions" next="Instructions2">
-        <transition></transition>
+    <layer id="Instructions" next="Instructions1">
+        <transition>NONE</transition>
         <force>false</force>
         <pause>true</pause>
         <duration></duration>
-        <image>resources/images/menu/instructions1.gif</image>
+        <image>resources/images/menu/Instructions.jpg</image>
+    </layer>
+    <layer id="Instructions1" next="Instructions2">
+        <transition>NONE</transition>
+        <force>false</force>
+        <pause>true</pause>
+        <duration></duration>
+        <image>resources/images/menu/Instructions1.jpg</image>
+    </layer>
+    <layer id="Instructions2" next="MainTitle">
+        <transition>NONE</transition>
+        <force>false</force>
+        <pause>true</pause>
+        <duration></duration>
+        <image>resources/images/menu/Instructions2.jpg</image>
     </layer>
     <layer id="GameStart">
         <!-- THIS LAYER IS INTENTIONALLY LEFT BLANK, THIS IS WHERE MAIN GAMEPLAY WILL START -->
     </layer>
     <layer id="OptionsInGame">
-        <transition></transition>
+        <transition>NONE</transition>
         <force>false</force>
         <pause>true</pause>
         <duration></duration>
@@ -103,7 +131,7 @@
         <options name="Exit Game" next="ExitGameConfirm" id="ExitGameConfirm"></options>
     </layer>
     <layer id="NewGameConfirm">
-        <transition></transition>
+        <transition>NONE</transition>
         <force>false</force>
         <pause>true</pause>
         <duration></duration>
@@ -117,7 +145,7 @@
     <layer id="CreateNewGame">
     </layer>
     <layer id="ExitGameConfirm">
-        <transition></transition>
+        <transition>NONE</transition>
         <force>false</force>
         <pause>true</pause>
         <duration></duration>
@@ -130,7 +158,7 @@
     </layer>
     <layer id="ExitGameConfirmed"></layer>
     <layer id="NoFocus">
-        <transition></transition>
+        <transition>NONE</transition>
         <force>false</force>
         <pause>true</pause>
         <duration></duration>

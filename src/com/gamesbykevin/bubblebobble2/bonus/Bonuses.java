@@ -1,5 +1,6 @@
 package com.gamesbykevin.bubblebobble2.bonus;
 
+import com.gamesbykevin.bubblebobble2.character.Character;
 import com.gamesbykevin.bubblebobble2.engine.Engine;
 import com.gamesbykevin.bubblebobble2.entity.Entity;
 import com.gamesbykevin.bubblebobble2.hero.Hero;
@@ -20,8 +21,11 @@ public final class Bonuses implements Disposable, IElement
     //bonus spritesheet
     private Image image;
     
-    //the default score value for each bonus
-    private static final int DEFAULT_BONUS_SCORE = 100;
+    //how many bonuses have been collected
+    private int collected = 0;
+    
+    //each total amount collected will be an extra life
+    private static final int BONUSES_PER_LIFE = 10;
     
     public Bonuses(final Image image)
     {
@@ -95,18 +99,23 @@ public final class Bonuses implements Disposable, IElement
             bonus.getTimer().update(engine.getMain().getTime());
             
             //if the hero is close enough to the bonus
-            if (hero.hasVelocity() && hero.getDistance(bonus) <= bonus.getWidth() * .75)
+            if (hero.hasVelocity() && hero.getDistance(bonus) <= bonus.getWidth() * Character.COLLISION_RATIO)
             {
+                //add to total
+                this.collected++;
+                
+                //if reached the next amount, we will add a life
+                if (collected % BONUSES_PER_LIFE == 0)
+                {
+                    //add life
+                    hero.setLives(hero.getLives() + 1);
+                }
+                
                 //remove
                 remove(bonus);
 
                 //deduct index
                 i--;
-                
-                //add to hero score
-                //hero.addScore(DEFAULT_BONUS_SCORE);
-                
-                System.out.println("Bonus Collected");
             }
             else
             {

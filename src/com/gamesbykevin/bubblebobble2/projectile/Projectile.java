@@ -9,6 +9,15 @@ import com.gamesbykevin.bubblebobble2.maps.Map;
 
 public abstract class Projectile extends Entity implements Disposable
 {
+    public Projectile()
+    {
+        //setup animations
+        setupAnimations();
+        
+        //setup animations after animations are setup
+        setDimensions();
+    }
+    
     @Override
     public void dispose()
     {

@@ -1,6 +1,9 @@
 package com.gamesbykevin.bubblebobble2.enemies;
 
 import com.gamesbykevin.bubblebobble2.engine.Engine;
+import com.gamesbykevin.bubblebobble2.hero.Hero;
+import com.gamesbykevin.bubblebobble2.projectile.Laser;
+import com.gamesbykevin.bubblebobble2.projectile.Projectile;
 
 public final class SuperSocket extends Enemy
 {
@@ -24,7 +27,7 @@ public final class SuperSocket extends Enemy
                 //if captured, prevent horizontal movement
                 if (isCaptured())
                 {
-                    super.manageCapture();
+                    manageCapture(engine.getManager().getMaps().getMap());
                 }
                 else
                 {
@@ -32,6 +35,8 @@ public final class SuperSocket extends Enemy
                     {
                         if (!hasVelocityX())
                         {
+                            setWalk(true);
+                            
                             if (engine.getRandom().nextBoolean())
                             {
                                 setVelocityX(isAngry()? getSpeedRun() : getSpeedWalk());
@@ -41,6 +46,22 @@ public final class SuperSocket extends Enemy
                             {
                                 setVelocityX(isAngry()? -getSpeedRun() : -getSpeedWalk());
                                 setHorizontalFlip(false);
+                            }
+                        }
+                        
+                        //the hero to attack
+                        Hero hero = engine.getManager().getHero();
+                        
+                        //make sure hero is below enemy
+                        if (hero.getY() > getY())
+                        {
+                            if (hero.getX() > getX() - getWidth() && hero.getX() < getX() + getWidth())
+                            {
+                                //update timer
+                                getTimer().update(engine.getMain().getTime());
+
+                                //add projectile
+                                addProjectile();
                             }
                         }
                     }
@@ -64,5 +85,34 @@ public final class SuperSocket extends Enemy
         
         //set the correct animation
         correctAnimation();
+    }
+    
+    @Override
+    public void addProjectile()
+    {
+        //if can't shoot projectile don't continue
+        if (!canShootProjectile() || !canAttack())
+            return;
+        
+        //if enough time hasn't passed till next projectile
+        if (!getTimer().hasTimePassed())
+            return;
+        
+        //reset timer
+        getTimer().reset();
+        
+        //stop moving
+        resetVelocityX();
+        
+        final Projectile projectile = new Laser(isAngry());
+        
+        //set the location
+        projectile.setLocation(getX(), getY() + (getHeight() / 2));
+        
+        //set the image of the projectile
+        projectile.setImage(getImage());
+        
+        //add projectile
+        super.addProjectile(projectile);
     }
 }

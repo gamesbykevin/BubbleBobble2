@@ -7,4 +7,6 @@
     <image id="Heroes">resources/images/game/Heroes.png</image>
     <image id="Enemies">resources/images/game/Enemies.png</image>
     <image id="Bonus">resources/images/game/Bonus.png</image>
+    <image id="GameOver">resources/images/game/GameOver.gif</image>
+    <image id="Victory">resources/images/game/Victory.jpg</image>
 </images>

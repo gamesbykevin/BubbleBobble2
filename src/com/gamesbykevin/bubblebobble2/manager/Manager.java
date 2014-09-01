@@ -8,6 +8,7 @@ import com.gamesbykevin.bubblebobble2.enemies.Enemies;
 import com.gamesbykevin.bubblebobble2.engine.Engine;
 import com.gamesbykevin.bubblebobble2.hero.Hero;
 import com.gamesbykevin.bubblebobble2.input.Input;
+import com.gamesbykevin.bubblebobble2.maps.Map;
 import com.gamesbykevin.bubblebobble2.maps.Maps;
 import com.gamesbykevin.bubblebobble2.menu.CustomMenu;
 import com.gamesbykevin.bubblebobble2.menu.CustomMenu.*;
@@ -15,6 +16,7 @@ import com.gamesbykevin.bubblebobble2.resources.*;
 import com.gamesbykevin.bubblebobble2.shared.Shared;
 
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.Rectangle;
 
 /**
@@ -32,9 +34,20 @@ public final class Manager implements IManager
     //the hero
     private Hero hero;
     
+    //object containing enemies
     private Enemies enemies;
     
+    //object containing bonuses
     private Bonuses bonuses;
+    
+    //has the game ended
+    private boolean gameover = false;
+    
+    //did they win
+    private boolean result = false;
+    
+    //image to diplay for win/lose
+    private Image imageWin, imageLose;
     
     /**
      * Constructor for Manager, this is the point where we load any menu option configurations
@@ -55,12 +68,6 @@ public final class Manager implements IManager
         //create new maps
         maps = new Maps(engine.getResources().getGameImage(GameImages.Keys.Maps), getWindow());
         
-        final int index = (int)(Math.random() * 200);
-        System.out.println("Random Level: " + (index+1));
-        
-        //set level start
-        maps.setStartingMap(index);
-        
         //create new hero
         hero = new Hero(Hero.Type.Hero1);
         hero.setImage(engine.getResources().getGameImage(GameImages.Keys.Heroes));
@@ -71,8 +78,35 @@ public final class Manager implements IManager
         //create container object for the bonuses
         bonuses = new Bonuses(engine.getResources().getGameImage(GameImages.Keys.Bonus));
         
-        //check the number of lives set
-        //switch (engine.getMenu().getOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.Lives))
+        //store image references
+        this.imageWin  = engine.getResources().getGameImage(GameImages.Keys.Victory);
+        this.imageLose = engine.getResources().getGameImage(GameImages.Keys.GameOver);
+        
+        //reset game
+        reset(engine);
+    }
+    
+    /**
+     * Determine if the player won or lost
+     * @param result true if won, false otherwise
+     */
+    public void setResult(final boolean result)
+    {
+        //mark game over
+        this.gameover = true;
+        
+        //store the result
+        this.result = result;
+    }
+    
+    private boolean hasGameover()
+    {
+        return this.gameover;
+    }
+    
+    private boolean hasResult()
+    {
+        return this.result;
     }
     
     public Bonuses getBonuses()
@@ -85,11 +119,82 @@ public final class Manager implements IManager
         return this.enemies;
     }
     
-    
     @Override
     public void reset(final Engine engine) throws Exception
     {
+        //determine how many lives to set
+        switch (engine.getMenu().getOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.Lives))
+        {
+            case 0:
+                hero.setLives(5);
+                break;
+                
+            case 1:
+                hero.setLives(10);
+                break;
+                
+            case 2:
+                hero.setLives(25);
+                break;
+                
+            case 3:
+                hero.setLives(99);
+                break;
+                
+            case 4:
+            default:
+                hero.setLives(1);
+                break;
+        }
         
+        //determine which level to start at
+        switch (engine.getMenu().getOptionSelectionIndex(CustomMenu.LayerKey.Options, CustomMenu.OptionKey.Level))
+        {
+            case 0:
+                maps.setStartingMap(0);
+                break;
+                
+            case 1:
+                maps.setStartingMap(19);
+                break;
+                
+            case 2:
+                maps.setStartingMap(39);
+                break;
+                
+            case 3:
+                maps.setStartingMap(59);
+                break;
+                
+            case 4:
+                maps.setStartingMap(79);
+                break;
+                
+            case 5:
+                maps.setStartingMap(99);
+                break;
+                
+            case 6:
+                maps.setStartingMap(119);
+                break;
+                
+            case 7:
+                maps.setStartingMap(139);
+                break;
+                
+            case 8:
+                maps.setStartingMap(159);
+                break;
+                
+            case 9:
+                maps.setStartingMap(179);
+                break;
+                
+            case 10:
+            default:
+                maps.setStartingMap(199);
+                break;
+        }
     }
     
     public Hero getHero()
@@ -160,6 +265,10 @@ public final class Manager implements IManager
     @Override
     public void update(final Engine engine) throws Exception
     {
+        //don't continue if game is over
+        if (hasGameover())
+            return;
+        
         if (!getMaps().isComplete())
         {
             //this is called to generate the maps
@@ -188,6 +297,13 @@ public final class Manager implements IManager
             //if there are no enemies or bonuses the level is complete
             if (!getEnemies().hasEnemies() && !getBonuses().hasBonuses() && !getMaps().hasTransition())
             {
+                //if there are no enemies and this is the last map
+                if (getMaps().isLastMap())
+                {
+                    //set victory
+                    setResult(true);
+                }
+                
                 //start transition
                 getMaps().setTransition(true);
                 
@@ -251,14 +367,29 @@ public final class Manager implements IManager
     @Override
     public void render(final Graphics graphics)
     {
-        //draw the map (progress will be drawn if maps aren't created yet)
-        getMaps().render(graphics);
-        
-        if (getMaps().isComplete())
+        //draw game elements if not over
+        if (!hasGameover())
         {
-            getBonuses().render(graphics);
-            getEnemies().render(graphics);
-            getHero().render(graphics);
+            //draw the map (progress will be drawn if maps aren't created yet)
+            getMaps().render(graphics);
+
+            if (getMaps().isComplete())
+            {
+                getBonuses().render(graphics);
+                getEnemies().render(graphics);
+                getHero().render(graphics);
+            }
+        }
+        else
+        {
+            if (hasResult())
+            {
+                graphics.drawImage(imageWin,  0, 0, Map.WIDTH, Map.HEIGHT, null);
+            }
+            else
+            {
+                graphics.drawImage(imageLose, 0, 0, Map.WIDTH, Map.HEIGHT, null);
+            }
         }
     }
 }

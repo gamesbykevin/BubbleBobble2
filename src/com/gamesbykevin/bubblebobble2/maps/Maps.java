@@ -5,7 +5,6 @@ import com.gamesbykevin.framework.resources.Disposable;
 
 import com.gamesbykevin.bubblebobble2.engine.Engine;
 import com.gamesbykevin.bubblebobble2.shared.IElement;
-import com.gamesbykevin.bubblebobble2.shared.Shared;
 
 import java.awt.Graphics;
 import java.awt.image.PixelGrabber;
@@ -122,9 +121,13 @@ public final class Maps implements Disposable, IElement
         return this.transition;
     }
     
-    public void setStartingMap(final int level)
+    /**
+     * Set the map
+     * @param index The desired map
+     */
+    public void setStartingMap(final int index)
     {
-        this.index = level;
+        this.index = index;
     }
     
     /**
@@ -168,11 +171,11 @@ public final class Maps implements Disposable, IElement
      */
     private void setMap()
     {
-        while (maps.get(index).getY() != 0)
+        while (maps.get(getIndex()).getY() != 0)
         {
             for (int i = 0; i < maps.size(); i++)
             {
-                if (maps.get(index).getY() > 0)
+                if (maps.get(getIndex()).getY() > 0)
                 {
                     maps.get(i).setY(maps.get(i).getY() - 1);
                 }
@@ -206,7 +209,7 @@ public final class Maps implements Disposable, IElement
      */
     public Map getMap()
     {
-        return getMap(index);
+        return getMap(getIndex());
     }
     
     /**
@@ -217,6 +220,20 @@ public final class Maps implements Disposable, IElement
     public Map getMap(final int index)
     {
         return maps.get(index);
+    }
+    
+    private int getIndex()
+    {
+        return this.index;
+    }
+    
+    /**
+     * Is this the last map
+     * @return true if so, otherwise false if not
+     */
+    public boolean isLastMap()
+    {
+        return (getIndex() >= maps.size() - 1);
     }
     
     /**
@@ -253,13 +270,13 @@ public final class Maps implements Disposable, IElement
                     }
                     
                     //is the next map at the finish line?
-                    if (getMap(index + 1).getY() <= 0)
+                    if (getMap(getIndex() + 1).getY() <= 0)
                     {
                         //stop the transition
                         setTransition(false);
                         
                         //set the next level
-                        setStartingMap(index + 1);
+                        setStartingMap(getIndex() + 1);
                     }
                 }
             }
@@ -301,7 +318,7 @@ public final class Maps implements Disposable, IElement
 
             //if moving to new map draw new map also
             if (hasTransition())
-                getMap(index + 1).draw(graphics, image);
+                getMap(getIndex() + 1).draw(graphics, image);
         }
     }
 }
