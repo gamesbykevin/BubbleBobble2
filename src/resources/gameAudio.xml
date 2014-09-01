@@ -3,4 +3,14 @@
     <!--
     <sound id="MusicBonus1">resources/audio/game/music/game/bonus1.mp3</sound>
     -->
+    <sound id="MusicTheme">resources/audio/game/music/Theme.mp3</sound>
+    <sound id="MusicGameOver">resources/audio/game/music/GameOver.mp3</sound>
+    <sound id="MusicEnding">resources/audio/game/music/Ending.mp3</sound>
+    
+    <sound id="SoundDie">resources/audio/game/sound/Die.wav</sound>
+    <sound id="SoundEnemyFire">resources/audio/game/sound/EnemyFire.wav</sound>
+    <sound id="SoundExtraLife">resources/audio/game/sound/ExtraLife.wav</sound>
+    <sound id="SoundFruit">resources/audio/game/sound/Fruit.wav</sound>
+    <sound id="SoundJump">resources/audio/game/sound/Jump.wav</sound>
+    <sound id="SoundPopBubble">resources/audio/game/sound/PopBubble.wav</sound>
 </sounds>

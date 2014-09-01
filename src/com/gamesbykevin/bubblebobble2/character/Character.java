@@ -96,6 +96,11 @@ public abstract class Character extends Entity implements Disposable, IElement
         this.speedRun = speedRun;
     }
     
+    public boolean hasProjectiles()
+    {
+        return (!getProjectiles().isEmpty());
+    }
+    
     private List<Projectile> getProjectiles()
     {
         return this.projectiles;

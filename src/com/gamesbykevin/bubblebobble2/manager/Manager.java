@@ -277,6 +277,9 @@ public final class Manager implements IManager
             //if the maps are now complete set the hero start location
             if (getMaps().isComplete())
             {
+                //play main theme
+                engine.getResources().playGameAudio(GameAudio.Keys.MusicTheme, true);
+                
                 //spawn the enemies
                 getEnemies().spawn(getMaps().getMap(), engine.getRandom());
                 
@@ -302,6 +305,11 @@ public final class Manager implements IManager
                 {
                     //set victory
                     setResult(true);
+                    
+                    //play victory sound
+                    engine.getResources().stopAllSound();
+                    engine.getResources().playGameAudio(GameAudio.Keys.MusicEnding, true);
+                    return;
                 }
                 
                 //start transition
@@ -342,8 +350,12 @@ public final class Manager implements IManager
                 else
                 {
                     //update character
-                    Input.update(getHero(), engine.getKeyboard());
+                    Input.update(getHero(), engine.getKeyboard(), engine.getResources());
 
+                    //check state before update
+                    final boolean hasLives = getHero().hasLives();
+                    final boolean dead = getHero().isDead();
+                    
                     //update hero
                     getHero().update(engine);
 
@@ -355,6 +367,17 @@ public final class Manager implements IManager
 
                     //update the maps
                     getMaps().update(engine);
+                    
+                    if (hasLives && !getHero().hasLives())
+                    {
+                        engine.getResources().stopAllSound();
+                        engine.getResources().playGameAudio(GameAudio.Keys.MusicGameOver);
+                    }
+                    else
+                    {
+                        if (!dead && getHero().isDead())
+                            engine.getResources().playGameAudio(GameAudio.Keys.SoundDie);
+                    }
                 }
             }
         }

@@ -4,6 +4,7 @@ import com.gamesbykevin.bubblebobble2.character.Character;
 import com.gamesbykevin.bubblebobble2.engine.Engine;
 import com.gamesbykevin.bubblebobble2.entity.Entity;
 import com.gamesbykevin.bubblebobble2.hero.Hero;
+import com.gamesbykevin.bubblebobble2.resources.GameAudio;
 import com.gamesbykevin.bubblebobble2.shared.IElement;
 
 import com.gamesbykevin.framework.resources.Disposable;
@@ -109,6 +110,14 @@ public final class Bonuses implements Disposable, IElement
                 {
                     //add life
                     hero.setLives(hero.getLives() + 1);
+                    
+                    //play sound effect
+                    engine.getResources().playGameAudio(GameAudio.Keys.SoundExtraLife);
+                }
+                else
+                {
+                    //play sound effect
+                    engine.getResources().playGameAudio(GameAudio.Keys.SoundFruit);
                 }
                 
                 //remove

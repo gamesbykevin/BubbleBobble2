@@ -7,6 +7,8 @@ import com.gamesbykevin.bubblebobble2.engine.Engine;
 import com.gamesbykevin.bubblebobble2.hero.Hero;
 import com.gamesbykevin.bubblebobble2.maps.Map;
 import com.gamesbykevin.bubblebobble2.projectile.Projectile;
+import com.gamesbykevin.bubblebobble2.resources.GameAudio;
+import com.gamesbykevin.bubblebobble2.resources.Resources;
 import com.gamesbykevin.bubblebobble2.shared.IElement;
 
 import java.awt.Graphics;
@@ -46,8 +48,9 @@ public final class Enemies implements Disposable, IElement
     /**
      * Check the enemies if they collided with the character
      * @param character The character we want to check
+     * @param resources Object containing sound
      */
-    private void checkCharacterCollision(final Character character)
+    private void checkCharacterCollision(final Character character, final Resources resources)
     {
         //don't bother checking if dead or haven't started, or invincible
         if (character.isDead() || character.isStarting())
@@ -66,6 +69,9 @@ public final class Enemies implements Disposable, IElement
             {
                 if (enemy.isCaptured())
                 {
+                    //play sound effect
+                    resources.playGameAudio(GameAudio.Keys.SoundPopBubble);
+                    
                     //mark enemy as dead
                     enemy.setDead(true);
                     
@@ -288,13 +294,20 @@ public final class Enemies implements Disposable, IElement
             //don't continue if here is starting
             if (hero.isStarting())
                 return;
-                    
+
+            boolean addProjectile = false;
+            
             for (int i = 0; i < enemies.size(); i++)
             {
                 Enemy enemy = getEnemy(i);
                 
+                final boolean hasProjectile = enemy.hasProjectiles();
+                
                 //update enemy
                 enemy.update(engine);
+                
+                if (!hasProjectile && enemy.hasProjectiles())
+                    addProjectile = true;
                 
                 //if death is finished enemy can be removed
                 if (enemy.hasDeathFinished())
@@ -309,10 +322,14 @@ public final class Enemies implements Disposable, IElement
                     i--;
                 }
             }
+            
+            //if projectile was added play sound effect
+            if (addProjectile)
+                engine.getResources().playGameAudio(GameAudio.Keys.SoundEnemyFire);
         }
         
         //check if the enemies hit the hero(es)
-        checkCharacterCollision(hero);
+        checkCharacterCollision(hero, engine.getResources());
     }
     
     @Override

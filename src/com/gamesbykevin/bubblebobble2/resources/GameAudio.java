@@ -16,7 +16,10 @@ public final class GameAudio extends AudioManager
      */
     public enum Keys
     {
+        MusicTheme, MusicGameOver, MusicEnding,
         
+        SoundDie, SoundEnemyFire, SoundExtraLife,
+        SoundFruit, SoundJump, SoundPopBubble
     }
     
     public GameAudio() throws Exception

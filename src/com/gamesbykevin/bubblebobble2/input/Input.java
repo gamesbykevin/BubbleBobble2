@@ -3,6 +3,9 @@ package com.gamesbykevin.bubblebobble2.input;
 import com.gamesbykevin.framework.input.Keyboard;
 
 import com.gamesbykevin.bubblebobble2.character.Character;
+import com.gamesbykevin.bubblebobble2.resources.GameAudio;
+import com.gamesbykevin.bubblebobble2.resources.Resources;
+
 import java.awt.event.KeyEvent;
 
 /**
@@ -25,7 +28,7 @@ public final class Input
      * @param character The character we want to manage
      * @param keyboard Object containing keyboard input
      */
-    public static void update(final Character character, final Keyboard keyboard)
+    public static void update(final Character character, final Keyboard keyboard, final Resources resources)
     {
         //if the character is starting don't check input yet
         if (character.isStarting() || character.isDead())
@@ -93,6 +96,9 @@ public final class Input
             {
                 character.setJump(true);
                 character.setVelocityY(-Character.MAX_SPEED_JUMP);
+                
+                //play sound effect
+                resources.playGameAudio(GameAudio.Keys.SoundJump);
             }
         }
         
