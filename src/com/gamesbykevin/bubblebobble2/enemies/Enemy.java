@@ -196,8 +196,15 @@ public abstract class Enemy extends Character implements Disposable
         //set animation
         super.setAnimation(Animations.Idle);
         
-        //set dimension size
-        super.setDimensions();
+        try
+        {
+            //set dimension size
+            super.setDimensions();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override

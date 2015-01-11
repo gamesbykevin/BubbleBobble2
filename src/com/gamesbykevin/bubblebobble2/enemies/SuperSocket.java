@@ -104,15 +104,22 @@ public final class SuperSocket extends Enemy
         //stop moving
         resetVelocityX();
         
-        final Projectile projectile = new Laser(isAngry());
-        
-        //set the location
-        projectile.setLocation(getX(), getY() + (getHeight() / 2));
-        
-        //set the image of the projectile
-        projectile.setImage(getImage());
-        
-        //add projectile
-        super.addProjectile(projectile);
+        try
+        {
+            final Projectile projectile = new Laser(isAngry());
+
+            //set the location
+            projectile.setLocation(getX(), getY() + (getHeight() / 2));
+
+            //set the image of the projectile
+            projectile.setImage(getImage());
+
+            //add projectile
+            super.addProjectile(projectile);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 }

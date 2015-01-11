@@ -72,8 +72,15 @@ public abstract class Entity extends Sprite implements Disposable
         //set current animation
         getSpriteSheet().setCurrent(object);
         
-        //set width/height based on current animation
-        setDimensions();
+        try
+        {
+            //set width/height based on current animation
+            setDimensions();
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
         
         if (reset)
             getSpriteSheet().reset();

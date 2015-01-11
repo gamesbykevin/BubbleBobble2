@@ -22,7 +22,7 @@ public final class Fire extends Projectile
     
     private static final String KEY = "Default";
     
-    public Fire(final boolean east)
+    public Fire(final boolean east) throws Exception
     {
         super();
         

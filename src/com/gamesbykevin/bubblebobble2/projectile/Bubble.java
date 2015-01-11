@@ -33,7 +33,7 @@ public final class Bubble extends Projectile
     private static final long MIDDLE_DELAY = Timers.toNanoSeconds(3250L);
     private static final long END_DELAY    = Timers.toNanoSeconds(175L);
     
-    public Bubble(final boolean east)
+    public Bubble(final boolean east) throws Exception
     {
         super();
         

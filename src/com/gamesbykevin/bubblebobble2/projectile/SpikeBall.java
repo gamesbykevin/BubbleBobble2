@@ -25,7 +25,7 @@ public final class SpikeBall extends Projectile
         Default, Angry
     }
     
-    public SpikeBall(final boolean east, final boolean angry)
+    public SpikeBall(final boolean east, final boolean angry) throws Exception
     {
         super();
         

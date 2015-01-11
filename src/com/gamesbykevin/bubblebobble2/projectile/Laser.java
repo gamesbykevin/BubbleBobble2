@@ -24,7 +24,7 @@ public class Laser extends Projectile
         Default, Angry
     }
     
-    public Laser(final boolean angry)
+    public Laser(final boolean angry) throws Exception
     {
         super();
         

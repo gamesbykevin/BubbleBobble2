@@ -9,7 +9,7 @@ import com.gamesbykevin.bubblebobble2.maps.Map;
 
 public abstract class Projectile extends Entity implements Disposable
 {
-    public Projectile()
+    public Projectile() throws Exception
     {
         //setup animations
         setupAnimations();

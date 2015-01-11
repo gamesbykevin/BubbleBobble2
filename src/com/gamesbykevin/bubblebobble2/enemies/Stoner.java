@@ -111,15 +111,22 @@ public class Stoner extends Enemy
         //stop moving
         resetVelocityX();
         
-        final Projectile projectile = new Fire(!hasHorizontalFlip());
-        
-        //set the location
-        projectile.setLocation(getX(), getY());
-        
-        //set the image of the projectile
-        projectile.setImage(getImage());
-        
-        //add projectile
-        super.addProjectile(projectile);
+        try
+        {
+            final Projectile projectile = new Fire(!hasHorizontalFlip());
+
+            //set the location
+            projectile.setLocation(getX(), getY());
+
+            //set the image of the projectile
+            projectile.setImage(getImage());
+
+            //add projectile
+            super.addProjectile(projectile);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 }

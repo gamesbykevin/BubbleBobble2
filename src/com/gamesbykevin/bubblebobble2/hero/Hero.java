@@ -202,8 +202,15 @@ public final class Hero extends Character
         //stop movement
         super.resetVelocity();
         
-        //set dimensions
-        super.setDimensions();
+        try
+        {
+            //set dimensions
+            super.setDimensions();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
         
         //flag we are starting
         super.setStart(true);
@@ -218,16 +225,23 @@ public final class Hero extends Character
     @Override
     public void addProjectile()
     {
-        final Projectile projectile = new Bubble(!hasHorizontalFlip());
-        
-        //set the location
-        projectile.setLocation(getX(), getY());
-        
-        //set the image of the projectile
-        projectile.setImage(getImage());
-        
-        //add projectile
-        super.addProjectile(projectile);
+        try
+        {
+            final Projectile projectile = new Bubble(!hasHorizontalFlip());
+
+            //set the location
+            projectile.setLocation(getX(), getY());
+
+            //set the image of the projectile
+            projectile.setImage(getImage());
+
+            //add projectile
+            super.addProjectile(projectile);
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
     
     @Override
