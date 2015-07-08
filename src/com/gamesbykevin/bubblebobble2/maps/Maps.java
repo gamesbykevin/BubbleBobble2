@@ -293,7 +293,7 @@ public final class Maps implements Disposable, IElement
      * @param graphics Object used to draw graphics
      */
     @Override
-    public void render(final Graphics graphics)
+    public void render(final Graphics graphics) throws Exception
     {
         if (!progress.isComplete())
         {

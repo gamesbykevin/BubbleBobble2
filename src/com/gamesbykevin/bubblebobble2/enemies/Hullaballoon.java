@@ -7,7 +7,7 @@ import com.gamesbykevin.bubblebobble2.maps.Map;
 
 public class Hullaballoon extends Enemy
 {
-    protected Hullaballoon()
+    protected Hullaballoon() throws Exception
     {
         super(Enemy.Type.Hullaballoon);
         
@@ -17,7 +17,7 @@ public class Hullaballoon extends Enemy
     }
     
     @Override
-    public void update(final Engine engine)
+    public void update(final Engine engine) throws Exception
     {
         //if we aren't starting
         if (!isStarting())

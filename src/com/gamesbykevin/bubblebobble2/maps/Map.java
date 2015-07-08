@@ -1,7 +1,7 @@
 package com.gamesbykevin.bubblebobble2.maps;
 
 import com.gamesbykevin.framework.base.Cell;
-import com.gamesbykevin.framework.labyrinth.Location;
+import com.gamesbykevin.framework.maze.Room;
 import com.gamesbykevin.framework.resources.Disposable;
 
 import com.gamesbykevin.bubblebobble2.entity.Entity;
@@ -44,10 +44,10 @@ public final class Map extends Entity implements Disposable
     private static final int FLOOR_GAP_END_COL_2   = 22;
     
     //the array of locations in this map
-    private Location[][] locations;
+    private Room[][] locations;
     
     //locations where the enemies can be placed
-    private List<Cell> spawnLocations;
+    private List<Room> spawnLocations;
     
     //where the hero1 will start
     public static final int START_COL_HERO_1 = BOUNDARY_COL_MIN;
@@ -78,7 +78,7 @@ public final class Map extends Entity implements Disposable
         this.startY = startY;
 
         //create new array of locations
-        this.locations = new Location[ROWS][COLUMNS];
+        this.locations = new Room[ROWS][COLUMNS];
         
         //create new list for spawn locations
         this.spawnLocations = new ArrayList<>();
@@ -89,7 +89,7 @@ public final class Map extends Entity implements Disposable
             for (int row = 0; row < ROWS; row++)
             {
                 //create new location
-                Location tmp = new Location(col, row);
+                Room tmp = new Room(col, row);
                 
                 //remove all walls by default
                 tmp.getWalls().clear();
@@ -102,18 +102,18 @@ public final class Map extends Entity implements Disposable
                 if (isBoundary(x, y, pixels))
                 {
                     //add all walls
-                    tmp.add(Location.Wall.East);
-                    tmp.add(Location.Wall.West);
-                    tmp.add(Location.Wall.North);
-                    tmp.add(Location.Wall.South);
+                    tmp.addWall(Room.Wall.East);
+                    tmp.addWall(Room.Wall.West);
+                    tmp.addWall(Room.Wall.North);
+                    tmp.addWall(Room.Wall.South);
                 }
                 else
                 {
                     //else remove all walls
-                    tmp.remove(Location.Wall.East);
-                    tmp.remove(Location.Wall.West);
-                    tmp.remove(Location.Wall.North);
-                    tmp.remove(Location.Wall.South);
+                    tmp.removeWall(Room.Wall.East);
+                    tmp.removeWall(Room.Wall.West);
+                    tmp.removeWall(Room.Wall.North);
+                    tmp.removeWall(Room.Wall.South);
                 }
                 
                 //assign new location
@@ -170,7 +170,7 @@ public final class Map extends Entity implements Disposable
                 if (hasFreeSpace(col, row, ENEMY_COLUMN_RANGE) && hasFreeSpace(COLUMNS - col, row, ENEMY_COLUMN_RANGE))
                 {
                     //add valid location to the list
-                    this.spawnLocations.add(new Cell(col + 1, row + 1));
+                    this.spawnLocations.add(new Room(col + 1, row + 1));
                 }
             }
         }
@@ -210,7 +210,7 @@ public final class Map extends Entity implements Disposable
         return this.startWest;
     }
     
-    public List<Cell> getSpawnLocations()
+    public List<Room> getSpawnLocations()
     {
         return this.spawnLocations;
     }
@@ -225,7 +225,7 @@ public final class Map extends Entity implements Disposable
     }
     
     @Override
-    protected void setupAnimations()
+    protected void setupAnimations() throws Exception
     {
         //the background map is static and won't change, so it is 1 frame and 1 animation
         super.addAnimation(Entity.DEFAULT_ANIMATION_KEY, 1, startX, startY, WIDTH, HEIGHT, 0, false);
@@ -291,7 +291,7 @@ public final class Map extends Entity implements Disposable
         if (col < 0 || col >= locations[0].length)
             return false;
         
-        return locations[row][col].hasWalls();
+        return (!locations[row][col].getWalls().isEmpty());
     }
     
     public boolean hasNorthCollision(final double x, final double y)
@@ -463,7 +463,7 @@ public final class Map extends Entity implements Disposable
             for (int row = 0; row < ROWS; row++)
             {
                 //get temporary location
-                Location tmp = locations[row][col];
+                Room tmp = locations[row][col];
                 
                 if (!isSolid(col, row))
                     continue;

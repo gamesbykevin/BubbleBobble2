@@ -9,7 +9,7 @@ public class Stoner extends Enemy
 {
     private static final int PROJECTILE_LIMIT = 1;
     
-    protected Stoner()
+    protected Stoner() throws Exception
     {
         super(Enemy.Type.Stoner);
         
@@ -18,7 +18,7 @@ public class Stoner extends Enemy
     }
     
     @Override
-    public void update(final Engine engine)
+    public void update(final Engine engine) throws Exception
     {
         //if we aren't starting
         if (!isStarting())

@@ -8,13 +8,13 @@ import com.gamesbykevin.bubblebobble2.maps.Map;
 
 public class Beluga extends Enemy
 {
-    protected Beluga()
+    protected Beluga() throws Exception
     {
         super(Enemy.Type.Beluga);
     }
     
     @Override
-    public void update(final Engine engine)
+    public void update(final Engine engine) throws Exception
     {
         //if we aren't starting
         if (!isStarting())

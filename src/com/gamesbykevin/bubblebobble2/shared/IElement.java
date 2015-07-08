@@ -22,5 +22,5 @@ public interface IElement extends Disposable
     /**
      * Draw our game element(s) accordingly
      */
-    public void render(final Graphics graphics);
+    public void render(final Graphics graphics) throws Exception;
 }

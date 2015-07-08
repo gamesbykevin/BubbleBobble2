@@ -7,13 +7,13 @@ import com.gamesbykevin.bubblebobble2.projectile.Projectile;
 
 public final class SuperSocket extends Enemy
 {
-    protected SuperSocket()
+    protected SuperSocket() throws Exception
     {
         super(Enemy.Type.SuperSocket);
     }
     
     @Override
-    public void update(final Engine engine)
+    public void update(final Engine engine) throws Exception
     {
         //if we aren't starting
         if (!isStarting())

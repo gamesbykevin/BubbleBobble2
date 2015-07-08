@@ -53,7 +53,7 @@ public abstract class Enemy extends Character implements Disposable
     
     private final Type type;
     
-    protected Enemy(final Type type)
+    protected Enemy(final Type type) throws Exception
     {
         //store enemy type
         this.type = type;
@@ -118,7 +118,7 @@ public abstract class Enemy extends Character implements Disposable
     public abstract void addProjectile();
     
     @Override
-    protected boolean checkProjectileCollision(final Projectile projectile)
+    protected boolean checkProjectileCollision(final Projectile projectile) throws Exception
     {
         //if this is true don't check for projectile collision
         if (isCaptured() || isStarting())
@@ -143,7 +143,7 @@ public abstract class Enemy extends Character implements Disposable
     }
     
     @Override
-    protected void setupAnimations()
+    protected void setupAnimations() throws Exception
     {
         final int y;
         
@@ -208,7 +208,7 @@ public abstract class Enemy extends Character implements Disposable
     }
 
     @Override
-    protected void correctAnimation()
+    protected void correctAnimation() throws Exception
     {
         if (isStarting())
             setAnimation(Animations.Idle);
@@ -223,7 +223,7 @@ public abstract class Enemy extends Character implements Disposable
             setAnimation(Animations.Destroyed);
     }
     
-    protected void manageDeath(final Map map, final long time)
+    protected void manageDeath(final Map map, final long time) throws Exception
     {
         //did we have east or west collision
         boolean east = false, west = false;
@@ -279,7 +279,7 @@ public abstract class Enemy extends Character implements Disposable
      * Check if the captured phase is 
      * @param map The current map played
      */
-    protected void manageCapture(final Map map)
+    protected void manageCapture(final Map map) throws Exception
     {
         //don't continue if not captured
         if (!isCaptured())

@@ -116,7 +116,7 @@ public final class Enemies implements Disposable, IElement
      * The first enemy that collides with the projectile will be captured and the projectile will be removed
      * @param projectile The projectile we want to check
      */
-    public void checkProjectileCollision(final Projectile projectile)
+    public void checkProjectileCollision(final Projectile projectile) throws Exception
     {
         for (int i = 0; i < this.getCount(); i++)
         {
@@ -285,7 +285,7 @@ public final class Enemies implements Disposable, IElement
     }
     
     @Override
-    public void update(final Engine engine)
+    public void update(final Engine engine) throws Exception
     {
         Hero hero = engine.getManager().getHero();
         
@@ -333,7 +333,7 @@ public final class Enemies implements Disposable, IElement
     }
     
     @Override
-    public void render(final Graphics graphics)
+    public void render(final Graphics graphics) throws Exception
     {
         if (enemies != null)
         {

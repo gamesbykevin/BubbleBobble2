@@ -28,7 +28,7 @@ public abstract class Projectile extends Entity implements Disposable
      * Check the collision with the map
      * @param map The current map played
      */
-    protected abstract void checkMapCollision(final Map map);
+    protected abstract void checkMapCollision(final Map map) throws Exception;
     
     /**
      * Manage the collision between the projectile and the parent that it belongs to
@@ -40,12 +40,12 @@ public abstract class Projectile extends Entity implements Disposable
      * Can the projectile be discarded?
      * @return true if projectile can be removed from character, false otherwise
      */
-    public abstract boolean canDiscard();
+    public abstract boolean canDiscard() throws Exception;
     
     /**
      * Flag the projectile to be discarded
      */
-    public abstract void markDiscard();
+    public abstract void markDiscard() throws Exception;
     
     /**
      * Can the projectile be stood on
@@ -63,5 +63,5 @@ public abstract class Projectile extends Entity implements Disposable
      * Each projectile will have its own separate logic
      * @param engine Object containing all game elements
      */
-    public abstract void update(final Engine engine);
+    public abstract void update(final Engine engine) throws Exception;
 }

@@ -4,13 +4,13 @@ import com.gamesbykevin.bubblebobble2.engine.Engine;
 
 public final class WillyWhistle extends Enemy
 {
-    protected WillyWhistle()
+    protected WillyWhistle() throws Exception
     {
         super(Enemy.Type.WillyWhistle);
     }
     
     @Override
-    public void update(final Engine engine)
+    public void update(final Engine engine) throws Exception
     {
         //if we aren't starting
         if (!isStarting())

@@ -23,7 +23,7 @@ public interface IManager extends Disposable
     /**
      * Draw our game element(s) accordingly
      */
-    public void render(final Graphics graphics);
+    public void render(final Graphics graphics) throws Exception;
     
     /**
      * Provide a way to reset the game elements

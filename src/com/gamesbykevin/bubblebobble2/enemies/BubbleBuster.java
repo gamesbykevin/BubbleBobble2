@@ -6,13 +6,13 @@ import com.gamesbykevin.bubblebobble2.hero.Hero;
 
 public final class BubbleBuster extends Enemy
 {
-    protected BubbleBuster()
+    protected BubbleBuster() throws Exception
     {
         super(Enemy.Type.BubbleBuster);
     }
     
     @Override
-    public void update(final Engine engine)
+    public void update(final Engine engine) throws Exception
     {
         //if we aren't starting
         if (!isStarting())

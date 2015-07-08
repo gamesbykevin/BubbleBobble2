@@ -6,13 +6,13 @@ import com.gamesbykevin.bubblebobble2.hero.Hero;
 
 public class Coiley extends Enemy
 {
-    protected Coiley()
+    protected Coiley() throws Exception
     {
         super(Enemy.Type.Coiley);
     }
     
     @Override
-    public void update(final Engine engine)
+    public void update(final Engine engine) throws Exception
     {
         //if we aren't starting
         if (!isStarting())

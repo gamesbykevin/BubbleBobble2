@@ -20,7 +20,7 @@ public abstract class Entity extends Sprite implements Disposable
     /**
      * Setup the animations for the entity
      */
-    protected abstract void setupAnimations();
+    protected abstract void setupAnimations() throws Exception;
     
     @Override
     public void dispose()
@@ -39,16 +39,23 @@ public abstract class Entity extends Sprite implements Disposable
      * @param delay Time delay between each frame
      * @param loop Does the animation loop
      */
-    protected void addAnimation(final Object object, final int count, final int x, final int y, final int w, final int h, final long delay, final boolean loop)
+    protected void addAnimation(final Object object, final int count, final int x, final int y, final int w, final int h, final long delay, final boolean loop) throws Exception
     {
         //create new animation
-        final Animation animation = new Animation();
+        Animation animation = null;
         
         //add each fram to animatiion
         for (int i = 0; i < count; i++)
         {
-            //add frame to animation
-            animation.add(x + (i * w), y, w, h, delay);
+            if (animation == null)
+            {
+                animation = new Animation(x + (i * w), y, w, h, delay);
+            }
+            else
+            {
+                //add frame to animation
+                animation.add(x + (i * w), y, w, h, delay);
+            }
         }
         
         //set the animation to loop
@@ -67,7 +74,7 @@ public abstract class Entity extends Sprite implements Disposable
      * @param object The unique key of the animation we want to set
      * @param reset If true we will reset the animation
      */
-    protected void setAnimation(final Object object, final boolean reset)
+    protected void setAnimation(final Object object, final boolean reset) throws Exception
     {
         //set current animation
         getSpriteSheet().setCurrent(object);
@@ -90,7 +97,7 @@ public abstract class Entity extends Sprite implements Disposable
      * Set the animation
      * @param object The unique key of the animation we want to set
      */
-    protected void setAnimation(final Object object)
+    protected void setAnimation(final Object object) throws Exception
     {
         setAnimation(object, false);
     }
@@ -109,7 +116,7 @@ public abstract class Entity extends Sprite implements Disposable
      * Has the animation finished
      * @return true if the current animation has finished, false otherwise
      */
-    public boolean isAnimationFinished()
+    public boolean isAnimationFinished() throws Exception
     {
         return (super.getSpriteSheet().hasFinished());
     }
@@ -134,7 +141,7 @@ public abstract class Entity extends Sprite implements Disposable
         }
     }
     
-    public void render(final Graphics graphics)
+    public void render(final Graphics graphics) throws Exception
     {
         //store original location
         final double x = getX();

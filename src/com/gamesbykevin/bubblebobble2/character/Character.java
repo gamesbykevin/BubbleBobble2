@@ -313,7 +313,7 @@ public abstract class Character extends Entity implements Disposable, IElement
     /**
      * Make sure the appropriate animation is set
      */
-    protected abstract void correctAnimation();
+    protected abstract void correctAnimation() throws Exception;
     
     /**
      * Add projectile
@@ -321,7 +321,7 @@ public abstract class Character extends Entity implements Disposable, IElement
     public abstract void addProjectile();
     
     @Override
-    public void update(final Engine engine)
+    public void update(final Engine engine) throws Exception
     {
         final Map map = engine.getManager().getMaps().getMap();
         
@@ -376,7 +376,7 @@ public abstract class Character extends Entity implements Disposable, IElement
      * @param projectile The projectile we are checking for collision
      * @return true if collision occurred, false otherwise
      */
-    protected abstract boolean checkProjectileCollision(final Projectile projectile);
+    protected abstract boolean checkProjectileCollision(final Projectile projectile) throws Exception;
     
     /**
      * Add projectile to list
@@ -545,7 +545,7 @@ public abstract class Character extends Entity implements Disposable, IElement
     }
     
     @Override
-    public void render(final Graphics graphics)
+    public void render(final Graphics graphics) throws Exception
     {
         if (!getProjectiles().isEmpty())
         {

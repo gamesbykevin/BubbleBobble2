@@ -31,7 +31,7 @@ public final class Fire extends Projectile
     }
     
     @Override
-    protected void setupAnimations()
+    protected void setupAnimations() throws Exception
     {
         //setup the animations for the bubble
         super.addAnimation(KEY,  1, 198, 0, WIDTH, HEIGHT, DELAY,  false);
@@ -44,14 +44,14 @@ public final class Fire extends Projectile
     }
     
     @Override
-    public boolean canDiscard()
+    public boolean canDiscard() throws Exception
     {
         //discard once animation finished
         return (super.isAnimationFinished());
     }
     
     @Override
-    public void markDiscard()
+    public void markDiscard() throws Exception
     {
         //mark animation as finished
         super.getSpriteSheet().getSpriteSheetAnimation().setFinished(true);
@@ -71,14 +71,14 @@ public final class Fire extends Projectile
     }
     
     @Override
-    protected void checkMapCollision(final Map map)
+    protected void checkMapCollision(final Map map) throws Exception
     {
         if (!map.hasBounds(getX(), getY()))
             markDiscard();
     }
     
     @Override
-    public void update(final Engine engine)
+    public void update(final Engine engine) throws Exception
     {
         //update location and animation
         super.update(engine.getMain().getTime());

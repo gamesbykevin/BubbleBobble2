@@ -42,7 +42,7 @@ public final class Bubble extends Projectile
     }
     
     @Override
-    protected void setupAnimations()
+    protected void setupAnimations() throws Exception
     {
         //setup the animations for the bubble
         super.addAnimation(Key.Begin,  4, 0,  64, WIDTH, HEIGHT, BEGIN_DELAY,  false);
@@ -60,13 +60,13 @@ public final class Bubble extends Projectile
     }
     
     @Override
-    public boolean canDiscard()
+    public boolean canDiscard() throws Exception
     {
         return (super.isAnimation(Key.End) && super.isAnimationFinished());
     }
     
     @Override
-    public void markDiscard()
+    public void markDiscard() throws Exception
     {
         //set as last animation
         super.setAnimation(Key.End);
@@ -109,13 +109,13 @@ public final class Bubble extends Projectile
         character.setY(getY() - character.getHeight());
     }
     
-    private void setupEndAnimation()
+    private void setupEndAnimation() throws Exception
     {
         super.setAnimation(Key.End, true);
         super.resetVelocity();
     }
     
-    private void setupMiddleAnimation()
+    private void setupMiddleAnimation() throws Exception
     {
         super.setAnimation(Key.Middle, true);
         super.resetVelocity();
@@ -123,7 +123,7 @@ public final class Bubble extends Projectile
     }
     
     @Override
-    protected void checkMapCollision(final Map map)
+    protected void checkMapCollision(final Map map) throws Exception
     {
         if (super.hasVelocityX())
         {
@@ -147,7 +147,7 @@ public final class Bubble extends Projectile
     }
     
     @Override
-    public void update(final Engine engine)
+    public void update(final Engine engine) throws Exception
     {
         //update location and animation
         super.update(engine.getMain().getTime());

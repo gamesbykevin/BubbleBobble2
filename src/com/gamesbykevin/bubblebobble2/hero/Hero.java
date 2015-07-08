@@ -56,7 +56,7 @@ public final class Hero extends Character
     private BufferedImage transparentImage;
     private Image original;
     
-    public Hero(final Type type)
+    public Hero(final Type type) throws Exception
     {
         super.setSpeedRun(SPEED_WALK);
         super.setSpeedWalk(SPEED_WALK);
@@ -113,7 +113,7 @@ public final class Hero extends Character
     }
     
     @Override
-    public void update(final Engine engine)
+    public void update(final Engine engine) throws Exception
     {
         if (!isDead())
         {
@@ -173,7 +173,7 @@ public final class Hero extends Character
     }
     
     @Override
-    protected void setupAnimations()
+    protected void setupAnimations() throws Exception
     {
         switch (type)
         {
@@ -245,7 +245,7 @@ public final class Hero extends Character
     }
     
     @Override
-    protected void correctAnimation()
+    protected void correctAnimation() throws Exception
     {
         if (!isAttacking())
         {
@@ -286,7 +286,7 @@ public final class Hero extends Character
     }
     
     @Override
-    public void render(final Graphics graphics)
+    public void render(final Graphics graphics) throws Exception
     {
         //set image depending on invincible
         super.setImage(isInvincible() ? transparentImage : original);

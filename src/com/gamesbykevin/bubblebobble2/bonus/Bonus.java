@@ -27,7 +27,7 @@ public final class Bonus extends Entity implements Disposable
     private static final int WIDTH = 16;
     private static final int HEIGHT = 16;
     
-    protected Bonus(final Type type)
+    protected Bonus(final Type type) throws Exception
     {
         //store the bonus type
         this.type = type;
@@ -45,7 +45,7 @@ public final class Bonus extends Entity implements Disposable
     }
     
     @Override
-    protected void setupAnimations()
+    protected void setupAnimations() throws Exception
     {
         switch (type)
         {

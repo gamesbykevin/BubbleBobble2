@@ -37,7 +37,7 @@ public final class Bonuses implements Disposable, IElement
         this.image = image;
     }
     
-    public void add(final Entity entity)
+    public void add(final Entity entity) throws Exception
     {
         //pick random fruit
         final int index = (int)(Math.random() * Bonus.Type.values().length);
@@ -158,7 +158,7 @@ public final class Bonuses implements Disposable, IElement
     }
     
     @Override
-    public void render(final Graphics graphics)
+    public void render(final Graphics graphics) throws Exception
     {
         if (bonuses != null)
         {

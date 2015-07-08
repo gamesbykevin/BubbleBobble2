@@ -8,7 +8,7 @@ import com.gamesbykevin.bubblebobble2.projectile.Projectile;
 
 public final class Incendo extends Enemy
 {
-    protected Incendo()
+    protected Incendo() throws Exception
     {
         super(Enemy.Type.Incendo);
         
@@ -18,7 +18,7 @@ public final class Incendo extends Enemy
     }
     
     @Override
-    public void update(final Engine engine)
+    public void update(final Engine engine) throws Exception
     {
         //if we aren't starting
         if (!isStarting())
