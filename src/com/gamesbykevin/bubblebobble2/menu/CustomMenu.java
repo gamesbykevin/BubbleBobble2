@@ -145,10 +145,10 @@ public final class CustomMenu extends Menu implements IElement
             Toggle tmpFullWindow = fullWindow;
             
             //are we currently in the in-game options
-            final boolean isInGameOptionsLayer = super.hasCurrent(LayerKey.OptionsInGame);
+            final boolean isInGameOptionsLayer = super.isCurrentLayer(LayerKey.OptionsInGame);
             
             //if starting a new game change layer, stop all sound
-            if (super.hasCurrent(LayerKey.CreateNewGame))
+            if (super.isCurrentLayer(LayerKey.CreateNewGame))
             {
                 //go to specified layer
                 super.setLayer(LayerKey.GameStart);
@@ -174,7 +174,7 @@ public final class CustomMenu extends Menu implements IElement
             }
             
             //if on the options screen check fullscreen setting
-            if (super.hasCurrent(LayerKey.Options))
+            if (super.isCurrentLayer(LayerKey.Options))
                 tmpFullWindow = Toggle.values()[getOptionSelectionIndex(LayerKey.Options, OptionKey.FullScreen)];
             
             //if the values are not equal to each other a change was made
@@ -230,7 +230,7 @@ public final class CustomMenu extends Menu implements IElement
             super.update(engine.getMouse(), engine.getKeyboard(), engine.getMain().getTime());
             
             //if confirming exit from the game, stop sound
-            if (super.hasCurrent(LayerKey.ExitGameConfirmed))
+            if (super.isCurrentLayer(LayerKey.ExitGameConfirmed))
             {
                 //recycle game related objects
                 engine.setReset();
